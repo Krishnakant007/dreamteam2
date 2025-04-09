@@ -11,7 +11,7 @@ import { db } from "@/lib/firebase";
 import { Button } from "../../components/ui/button";
 
 const categories = [
-  { name: "League", key: "League", image: "/ipl.webp" },
+  { name: "League", key: "League", image: "/IPL.webp" },
   { name: "International", key: "International", image: "/international.png" },
   { name: "Domestic", key: "Domestic", image: "/Domestic.webp" },
   { name: "Women", key: "Women", image: "/Woman.webp" },
@@ -21,10 +21,10 @@ const IPL_TEAM_IMAGES: { [key: string]: string } = {
   "Chennai Super Kings": "/images/CSK.png",
   "Mumbai Indians": "/images/MI.webp",
   "Kolkata Knight Riders": "/images/kkr.png",
-  "Sunrisers Hyderabad": "/images/SRH (2).png",
+  "Sunrisers Hyderabad": "/images/SRH2.png",
   "Delhi Capitals": "/images/DC.webp",
-  "Lucknow Super Giants": "/images/LSG (2).png",
-  "Rajasthan Royals": "/images/RR (2).png",
+  "Lucknow Super Giants": "/images/LSG2.png",
+  "Rajasthan Royals": "/images/RR2.png",
   "Punjab Kings": "/images/PBKS.webp",
   "Gujarat Titans": "/images/GT.webp",
   "Royal Challengers Bengaluru": "/images/rcb.png",
