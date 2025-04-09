@@ -33,7 +33,7 @@ const IPL_TEAM_IMAGES: { [key: string]: string } = {
   // Add other teams as needed
 }
 
-const getTeamImage = (teamName: string) => IPL_TEAM_IMAGES[teamName] || "/fallback.png";
+const getTeamImage = (teamName: string) => IPL_TEAM_IMAGES[teamName] || "/fallback2.webp";
 
 export default function MatchList() {
   const [matches, setMatches] = useState<any[]>([]);
