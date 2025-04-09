@@ -14,4 +14,4 @@ export const IPL_TEAM_IMAGES: { [key: string]: string } = {
   "Pakistan": "/images/pak.png",
   };
   
-  export const getTeamImage = (teamName: string) => IPL_TEAM_IMAGES[teamName] || "/fallback.png";
+  export const getTeamImage = (teamName: string) => IPL_TEAM_IMAGES[teamName] || "/fallback2.webp";
