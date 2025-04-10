@@ -5,6 +5,6 @@ export const metadata: Metadata = {
   title: 'DreamTeam',
   description: 'AI-powered IPL fantasy team builder',
   icons: {
-    icon: '/logo.png', // 👈 favicon here
+    icon: '/favicon.png', // 👈 favicon here
   },
 };
