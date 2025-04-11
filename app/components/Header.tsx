@@ -373,8 +373,8 @@ export default function Header() {
   return (
     <header className="flex justify-between items-center p-4 bg-gradient-to-r from-green-900 to-gray-800 text-white shadow-lg fixed top-0 left-0 right-0 z-50">
       <div className="flex items-center gap-4 md:gap-6">
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="bg-white p-1.5 rounded-lg group-hover:rotate-12 transition-transform">
+        <Link href="/" className="flex items-center gap-1 group">
+          <div className="">
             <img src="/logo.png" alt="logo" className="w-8 h-8 md:w-10 md:h-10" />
           </div>
           <span className="text-xl font-bold hidden sm:inline bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
