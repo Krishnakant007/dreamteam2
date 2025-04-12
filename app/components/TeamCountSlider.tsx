@@ -41,9 +41,9 @@ export default function TeamCountSlider({ value, onChange }: TeamCountSliderProp
       </div>
       
       <div className="flex justify-between text-xs text-gray-400 mt-2">
-        <span>1 Team (₹10)</span>
-        <span>10 Teams (₹100)</span>
-        <span>20 Teams (₹200)</span>
+         <span>1 Team (₹100)</span>
+        <span>10 Teams (₹1000)</span>
+        <span>20 Teams (₹2000)</span>
       </div>
     </div>
   );
