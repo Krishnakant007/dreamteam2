@@ -461,7 +461,7 @@ export function PaymentDialog({
 
                     <DialogDescription className="text-gray-600 flex justify-between mt-2">
                         <span className="font-bold">Current: <span className="font-extrabold text-green-500">₹{currentBalance}</span> </span>
-                        <span className="ont-bold">Required: <span className="font-extrabold   text-gray-500">  ₹{requiredAmount}</span> </span>
+                        <span className="ont-bold"> Minimum Required: <span className="font-extrabold   text-gray-500">  ₹{requiredAmount}</span> </span>
                     </DialogDescription>
                 </DialogHeader>
 
