@@ -16,7 +16,7 @@ export default function TeamCountSlider({ value, onChange }: TeamCountSliderProp
       <div className="flex justify-between items-center">
         <label className="font-semibold text-lg">Number of Teams</label>
         <span className="bg-blue-500 px-3 py-1 rounded-full text-sm font-bold text-white">
-          {value} {value === 1 ? 'Team' : 'Teams'} (₹{value * 10})
+          {value} {value === 1 ? 'Team' : 'Teams'} (₹{value * 100})
         </span>
       </div>
       
