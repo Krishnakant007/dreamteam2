@@ -1564,16 +1564,16 @@ export const useTeamGenerator = ({
         ) : !team1 || !team2 ? (
           "Select both teams"
         ) : needsPayment ? (
-          `Add ₹${paymentAmount} to Generate (₹100 per team)`
+          `Add ₹${paymentAmount} to Generate team`
         ) : (
           `Generate ${teamCount} Teams (₹${requiredCredits})`
         )}
       </button>
 
       <div className="flex justify-between text-sm">
-        <span>Your Credits: ₹{userBalance}</span>
+        <span>Your Credits: <span className='text-green-500'>₹{userBalance} </span> </span>
         {needsPayment ? (
-          <span className="text-yellow-500">Need ₹{paymentAmount} more</span>
+          <span className="text-red-500">Need ₹{paymentAmount} more</span>
         ) : (
           <span className="text-green-500">Sufficient balance</span>
         )}
