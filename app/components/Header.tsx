@@ -111,7 +111,7 @@ export default function Header() {
             if (!open) setIsProcessingPayment(false);
           }}
           currentBalance={balance}
-          requiredAmount={10}
+          requiredAmount={100}
           onPaymentSuccess={handlePaymentSuccess}
           onProcessingStateChange={setIsProcessingPayment}
         />
