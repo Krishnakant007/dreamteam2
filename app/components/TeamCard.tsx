@@ -1517,16 +1517,38 @@
 // }
 
 
-
-
-
-
-
-import { GeneratedTeam } from "../../types/match";
 import { useEffect, useState } from "react";
 import { FiShare2, FiX, FiMaximize } from 'react-icons/fi';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faWhatsapp, faTelegram, faTwitter } from '@fortawesome/free-brands-svg-icons';
+
+interface Player {
+  id: string;
+  name: string;
+  imgURL?: string;
+  teamName: string;
+  teamShortName?: string;
+  role: string;
+  roleOrder: number;
+  keeper?: boolean;
+  selectedBy?: number;
+  substitute?: boolean;
+  wasSubstituted?: boolean;
+  replacedPlayer?: string;
+}
+
+interface GeneratedTeam {
+  id: string;
+  name?: string;
+  players: Player[];
+  substitutes: Player[];
+  captain: Player;
+  viceCaptain: Player;
+  riskLevel?: number;
+  team1ShortName?: string;
+  team2ShortName?: string;
+  changes?: number;
+}
 
 interface TeamCardProps {
   team: GeneratedTeam;
@@ -1538,7 +1560,7 @@ interface TeamCardProps {
 }
 
 interface PlayerRowProps {
-  player: any;
+  player: Player;
   isSubstitute: boolean;
   wasSubstituted?: boolean;
   isSubstituteList?: boolean;
@@ -1572,13 +1594,17 @@ const PlayerRow = ({
         src={player.imgURL || "/fallback.png"} 
         alt={player.name} 
         className="w-8 h-8 rounded-full"
+        onError={(e) => {
+          const target = e.target as HTMLImageElement;
+          target.src = "/fallback.png";
+        }}
       />
       <div className="flex-1">
         <div className="flex justify-between items-center">
           <span className={isSubstitute ? 'line-through' : ''}>
             {player.name}
             {player.keeper && ' (WK)'}
-            {wasSubstituted && ` (replaced ${player.replacedPlayer})`}
+            {wasSubstituted && player.replacedPlayer && ` (replaced ${player.replacedPlayer})`}
           </span>
         </div>
         <p className="text-xs text-gray-400">{player.teamShortName || player.teamName}</p>
@@ -1610,7 +1636,7 @@ export default function TeamCard({
   isNewTeam = false
 }: TeamCardProps) {
   const [originalTeam] = useState<GeneratedTeam>({...team});
-  const [changes, setChanges] = useState<number>((team as any).changes || 0);
+  const [changes, setChanges] = useState<number>(team.changes || 0);
   const [playerChanges, setPlayerChanges] = useState<Array<{
     out: string;
     in: string;
@@ -1678,23 +1704,15 @@ export default function TeamCard({
   }, [team, onUpdateTeam]);
 
   const playersByRole = {
-    'WK-Batsman': team.players.filter(p => p.roleOrder === 1),
-    'Batsman': team.players.filter(p => p.roleOrder === 2),
-    'Batting Allrounder': team.players.filter(p => p.roleOrder === 3),
-    'Bowling Allrounder': team.players.filter(p => p.roleOrder === 4),
-    'Bowler': team.players.filter(p => p.roleOrder === 5)
+    'WK-Batsman': team.players.filter(p => normalizeRole(p.role) === 'WK-Batsman'),
+    'Batsman': team.players.filter(p => normalizeRole(p.role) === 'Batsman'),
+    'Batting Allrounder': team.players.filter(p => normalizeRole(p.role) === 'Batting Allrounder'),
+    'Bowling Allrounder': team.players.filter(p => normalizeRole(p.role) === 'Bowling Allrounder'),
+    'Bowler': team.players.filter(p => normalizeRole(p.role) === 'Bowler')
   };
 
   const team1Count = team.players.filter(p => p.teamName === team.captain.teamName).length;
   const team2Count = 11 - team1Count;
-
-  const formatPlayerName = (name: string) => {
-    const parts = name.split(' ');
-    if (parts.length === 1) return name;
-    const firstName = parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase();
-    const lastName = parts.slice(1).join(' ');
-    return `${firstName} ${lastName}`;
-  };
 
   const generateShareText = () => {
     const captainTeamName = team.team1ShortName || team.captain.teamName;
@@ -1775,7 +1793,7 @@ export default function TeamCard({
       )}
       
       <div className="bg-gray-800 p-3 flex justify-between items-center">
-        <h3 className="font-bold">Team {index + 1}</h3>
+        <h3 className="font-bold">{team.name || `Team ${index + 1}`}</h3>
         <div className="flex items-center gap-2">
           {changes > 0 && (
             <span className="bg-yellow-500 text-black text-xs px-2 py-1 rounded-full">
@@ -1789,6 +1807,7 @@ export default function TeamCard({
                 setShowShareOptions(!showShareOptions);
               }}
               className="text-gray-300 hover:text-white p-1"
+              aria-label="Share team"
             >
               <FiShare2 size={18} />
             </button>
@@ -1798,6 +1817,7 @@ export default function TeamCard({
                 setIsFullScreen(!isFullScreen);
               }}
               className="text-gray-300 hover:text-white p-1"
+              aria-label={isFullScreen ? "Close full screen" : "View full screen"}
             >
               {isFullScreen ? <FiX size={18} /> : <FiMaximize size={18} />}
             </button>
@@ -1810,6 +1830,7 @@ export default function TeamCard({
               }}
               onClick={(e) => e.stopPropagation()}
               className="h-5 w-5 rounded text-blue-600 cursor-pointer"
+              aria-label="Select team"
             />
           </div>
         </div>
@@ -1866,6 +1887,10 @@ export default function TeamCard({
                 src={team.captain.imgURL || "/fallback.png"} 
                 alt={team.captain.name} 
                 className="w-10 h-10 rounded-full"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = "/fallback.png";
+                }}
               />
               <div className="flex-1">
                 <div className="flex justify-between items-center">
@@ -1888,6 +1913,10 @@ export default function TeamCard({
                 src={team.viceCaptain.imgURL || "/fallback.png"} 
                 alt={team.viceCaptain.name} 
                 className="w-10 h-10 rounded-full"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = "/fallback.png";
+                }}
               />
               <div className="flex-1">
                 <div className="flex justify-between items-center">
@@ -2030,7 +2059,11 @@ export default function TeamCard({
       <div className="fixed inset-0 bg-gray-900 z-50 p-1 overflow-y-auto">
         <div className="flex justify-between items-center mb-1 sticky top-0 bg-gray-900 py-1">
           <h2 className="text-base font-bold text-white">{team.name || `Team ${index + 1}`}</h2>
-          <button onClick={() => setIsFullScreen(false)} className="text-white p-0">
+          <button 
+            onClick={() => setIsFullScreen(false)} 
+            className="text-white p-0"
+            aria-label="Close full screen view"
+          >
             <FiX size={18} />
           </button>
         </div>
@@ -2050,6 +2083,10 @@ export default function TeamCard({
                           src={player.imgURL || "/fallback.png"}
                           alt={player.name}
                           className="w-11 h-11 rounded-full object-cover border border-gray-600"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = "/fallback.png";
+                          }}
                         />
                         {player.id === team.captain.id && (
                           <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-[9px] rounded-full w-3.5 h-3.5 flex items-center justify-center border border-white">
@@ -2075,7 +2112,7 @@ export default function TeamCard({
         </div>
   
         <div className="mt-3 text-center text-[11px] text-gray-400 sticky bottom-0 bg-gray-900 py-1">
-          {team.team1ShortName} vs {team.team2ShortName}
+          {team.team1ShortName || team.captain.teamName} vs {team.team2ShortName || opponentTeamName}
         </div>
       </div>
     );
