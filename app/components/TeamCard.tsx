@@ -1522,8 +1522,6 @@
 
 
 
-
-
 import { GeneratedTeam } from "../../types/match";
 import { useEffect, useState } from "react";
 import { FiShare2, FiX, FiMaximize } from 'react-icons/fi';
@@ -2099,3 +2097,6 @@ export default function TeamCard({
     </>
   );
 }
+
+
+
