@@ -1567,9 +1567,9 @@ interface PlayerRowProps {
 }
 
 const getRiskColor = (riskLevel: number) => {
-  if (riskLevel < 30) return '#10B981'; // green
-  if (riskLevel < 70) return '#F59E0B'; // yellow
-  return '#EF4444'; // red
+  if (riskLevel < 30) return '#10B981';
+  if (riskLevel < 70) return '#F59E0B';
+  return '#EF4444';
 };
 
 const PlayerRow = ({ 
@@ -1584,12 +1584,8 @@ const PlayerRow = ({
     isSubstituteList ? 'bg-gray-600' : 'bg-gray-800'
   }`}>
     <div className="flex items-center gap-2 w-full">
-      {isSubstituteList && (
-        <span className="text-yellow-400">→</span>
-      )}
-      {wasSubstituted && (
-        <span className="text-green-400">↑</span>
-      )}
+      {isSubstituteList && <span className="text-yellow-400">→</span>}
+      {wasSubstituted && <span className="text-green-400">↑</span>}
       <img 
         src={player.imgURL || "/fallback.png"} 
         alt={player.name} 
@@ -1614,8 +1610,7 @@ const PlayerRow = ({
 );
 
 const normalizeRole = (role: string): string => {
-  if (!role) return 'Bowler'; 
-  
+  if (!role) return 'Bowler';
   const lowerRole = role.toLowerCase().trim();
   if (lowerRole.includes('keep') || lowerRole.includes('wk')) return 'WK-Batsman';
   if (lowerRole.includes('bat') && lowerRole.includes('all')) return 'Batting Allrounder';
@@ -1623,7 +1618,6 @@ const normalizeRole = (role: string): string => {
   if (lowerRole.includes('bat')) return 'Batsman';
   if (lowerRole.includes('bowl')) return 'Bowler';
   if (lowerRole.includes('all')) return 'Bowling Allrounder';
-  
   return 'Bowler';
 };
 
@@ -1635,7 +1629,6 @@ export default function TeamCard({
   onUpdateTeam,
   isNewTeam = false
 }: TeamCardProps) {
-  const [originalTeam] = useState<GeneratedTeam>({...team});
   const [changes, setChanges] = useState<number>(team.changes || 0);
   const [playerChanges, setPlayerChanges] = useState<Array<{
     out: string;
@@ -1793,7 +1786,7 @@ export default function TeamCard({
       )}
       
       <div className="bg-gray-800 p-3 flex justify-between items-center">
-        <h3 className="font-bold">{team.name || `Team ${index + 1}`}</h3>
+        <h3 className="font-bold">{team?.name || `Team ${index + 1}`}</h3>
         <div className="flex items-center gap-2">
           {changes > 0 && (
             <span className="bg-yellow-500 text-black text-xs px-2 py-1 rounded-full">
@@ -2037,14 +2030,6 @@ export default function TeamCard({
   );
 
   const FullScreenView = () => {
-    const playingXI = [
-      ...playersByRole['WK-Batsman'],
-      ...playersByRole['Batsman'],
-      ...playersByRole['Batting Allrounder'],
-      ...playersByRole['Bowling Allrounder'],
-      ...playersByRole['Bowler']
-    ].slice(0, 11);
-  
     const roleGroups = [
       { title: "WICKET-KEEPERS", players: playersByRole['WK-Batsman'] },
       { title: "BATTERS", players: playersByRole['Batsman'] },
@@ -2058,7 +2043,7 @@ export default function TeamCard({
     return (
       <div className="fixed inset-0 bg-gray-900 z-50 p-1 overflow-y-auto">
         <div className="flex justify-between items-center mb-1 sticky top-0 bg-gray-900 py-1">
-          <h2 className="text-base font-bold text-white">{team.name || `Team ${index + 1}`}</h2>
+          <h2 className="text-base font-bold text-white">{team?.name || `Team ${index + 1}`}</h2>
           <button 
             onClick={() => setIsFullScreen(false)} 
             className="text-white p-0"
