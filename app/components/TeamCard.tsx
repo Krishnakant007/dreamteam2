@@ -2762,7 +2762,7 @@ interface Player {
 }
 
 interface GeneratedTeam {
-  id: string;
+  id: number;
   name?: string;
   players: Player[];
   substitutes: Player[];
