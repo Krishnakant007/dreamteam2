@@ -147,7 +147,7 @@ export interface MatchData {
 }
 
 export interface GeneratedTeam {
-  id?: number; // ✅ Add this line
+  id: number; // ✅ Add this line
   players: PlayerDetail[];
   captain: PlayerDetail;
   viceCaptain: PlayerDetail;
