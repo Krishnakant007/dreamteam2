@@ -19684,7 +19684,7 @@ interface Player {
 }
 
 interface GeneratedTeam {
-  id?: string;
+  id: number;
   players?: Player[];
   createdAt?: Date | string;
 }
