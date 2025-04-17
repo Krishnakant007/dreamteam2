@@ -263,7 +263,6 @@
 
 
 
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -294,10 +293,30 @@ const IPL_TEAM_IMAGES: { [key: string]: string } = {
   "Royal Challengers Bengaluru": "/images/rcb.png",
   "New Zealand": "/images/nz.png",
   "Pakistan": "/images/pak.png",
-  // Add other teams as needed
-}
+};
 
 const getTeamImage = (teamName: string) => IPL_TEAM_IMAGES[teamName] || "/fallback2.webp";
+
+// Helper function for team abbreviations
+const getTeamShortName = (teamName: string) => {
+  const knownAbbreviations: Record<string, string> = {
+    "Mumbai Indians": "MI",
+    "Chennai Super Kings": "CSK",
+    "Kolkata Knight Riders": "KKR",
+    "Sunrisers Hyderabad": "SRH",
+    "Delhi Capitals": "DC",
+    "Lucknow Super Giants": "LSG",
+    "Rajasthan Royals": "RR",
+    "Punjab Kings": "PBKS",
+    "Gujarat Titans": "GT",
+    "Royal Challengers Bengaluru": "RCB",
+    "New Zealand": "NZ",
+    "Pakistan": "PAK",
+  };
+
+  return knownAbbreviations[teamName] || 
+    teamName.split(' ').map(word => word[0]).join('').toUpperCase();
+};
 
 export default function MatchList() {
   const [matches, setMatches] = useState<any[]>([]);
@@ -331,7 +350,7 @@ export default function MatchList() {
       setIsLoading(false);
     }
   };
-  
+
   useEffect(() => {
     fetchMatches();
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -453,7 +472,7 @@ export default function MatchList() {
                           />
                         </div>
                         <span className="text-xs mt-1 text-gray-300">
-                          {match.team1.split(' ').map((word: string) => word[0]).join('').toUpperCase()}
+                          {getTeamShortName(match.team1)}
                         </span>
                       </div>
                       <span className="text-lg font-semibold text-gray-400">VS</span>
@@ -470,7 +489,7 @@ export default function MatchList() {
                           />
                         </div>
                         <span className="text-xs mt-1 text-gray-300">
-                          {match.team2.split(' ').map((word: string) => word[0]).join('').toUpperCase()}
+                          {getTeamShortName(match.team2)}
                         </span>
                       </div>
                     </div>
@@ -487,7 +506,7 @@ export default function MatchList() {
                       </p>
                     </div>
 
-                    {/* Button - Show "View Teams" if match is live, otherwise "Build Team" or "Update Soon" */}
+                    {/* Button - Show "View Teams" if match is live, otherwise "Build Team" */}
                     {match.show ? (
                       <Link href={`/build-team/${match.id}`} passHref className="w-full">
                         <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
