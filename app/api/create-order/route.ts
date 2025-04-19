@@ -34,15 +34,19 @@
 
 
 
+
+
+
 // app/api/create-order/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
 
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
+  key_id: process.env.RAZORPAY_KEY_ID!,
+  key_secret: process.env.RAZORPAY_KEY_SECRET!,
 });
+
 
 export async function POST(request: NextRequest) {
   try {
@@ -81,15 +85,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create Razorpay order
-    const options = {
-      amount: Math.round(Number(amount)),
-      currency: currency || 'INR',
-      payment_capture: 1,
-      notes: {
-        created_at: new Date().toISOString()
-      }
-    };
+ // Create Razorpay order
+const options = {
+  amount: Math.round(Number(amount)), // Ensure amount is a valid number
+  currency: currency || 'INR', // Use 'INR' if currency is undefined
+  receipt: `receipt_order_${Date.now()}`, // Unique receipt ID
+  payment_capture: 1, // Set payment capture to true (1)
+  notes: {
+    created_at: new Date().toISOString(), // Add creation timestamp
+  },
+};
+
+
+
 
     const order = await razorpay.orders.create(options);
 
