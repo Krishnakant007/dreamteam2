@@ -182,6 +182,7 @@ export interface PlayerDetail {
   nickName: string;
   role: string;
   captain: boolean;
+  viceCaptain?: boolean
   keeper: boolean;
   isOverseas: boolean;
   battingStyle?: string;
