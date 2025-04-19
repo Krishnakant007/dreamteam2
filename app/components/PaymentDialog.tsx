@@ -538,6 +538,298 @@
 
 
 
+// "use client";
+
+// import { useState, useEffect } from "react";
+// import { Button } from "@/components/ui/button";
+// import { Dialog, DialogHeader, DialogTitle, DialogContent, DialogDescription } from "../../components/ui/dialog";
+// import { Input } from "@/components/ui/input";
+// import { db } from "@/lib/firebase";
+// import { doc, updateDoc } from "firebase/firestore";
+// import { useUser } from "@clerk/nextjs";
+// import { toast } from "sonner";
+// import { X } from "lucide-react";
+
+// declare global {
+//     interface Window {
+//         Razorpay: any;
+//     }
+// }
+
+// const presetAmounts = [1, 500, 1000, 2000];
+
+// interface PaymentDialogProps {
+//     currentBalance: number;
+//     requiredAmount: number;
+//     onPaymentSuccess: (amount: number) => void;
+//     onOpenChange: (open: boolean) => void;
+//     open: boolean;
+//     onProcessingStateChange?: (isProcessing: boolean) => void;
+// }
+
+// export function PaymentDialog({
+//     currentBalance,
+//     requiredAmount,
+//     onPaymentSuccess,
+//     onOpenChange,
+//     open,
+//     onProcessingStateChange,
+// }: PaymentDialogProps) {
+//     const { user } = useUser();
+//     const [amount, setAmount] = useState<number>(Math.max(1, requiredAmount));
+//     const [isProcessing, setIsProcessing] = useState(false);
+//     const [error, setError] = useState<string | null>(null);
+//     const [scriptLoaded, setScriptLoaded] = useState(false);
+
+//     useEffect(() => {
+//         if (open && typeof window !== 'undefined') {
+//             if (window.Razorpay) {
+//                 setScriptLoaded(true);
+//                 return;
+//             }
+
+//             const script = document.createElement('script');
+//             script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+//             script.async = true;
+//             script.onload = () => setScriptLoaded(true);
+//             script.onerror = () => {
+//                 setError('Failed to load payment system');
+//                 toast.error('Payment system unavailable. Please refresh.');
+//             };
+//             document.body.appendChild(script);
+
+//             return () => {
+//                 document.body.removeChild(script);
+//             };
+//         }
+//     }, [open]);
+
+//     const handlePayment = async () => {
+//         if (!user) {
+//             setError('Please sign in to make payments');
+//             return;
+//         }
+
+//         if (amount < 1) {
+//             setError(`Minimum ₹1 required`);
+//             return;
+//         }
+
+//         if (amount < requiredAmount) {
+//             setError(`At least ₹${requiredAmount} required for this operation`);
+//             return;
+//         }
+
+//         setIsProcessing(true);
+//         if (onProcessingStateChange) {
+//             onProcessingStateChange(true);
+//         }
+//         setError(null);
+//         onOpenChange(false);
+
+//         try {
+//             const response = await fetch('/api/create-order', {
+//                 method: 'POST',
+//                 headers: {
+//                     'Content-Type': 'application/json',
+//                 },
+//                 body: JSON.stringify({
+//                     amount: amount * 100,
+//                     currency: 'INR'
+//                 }),
+//             });
+
+//             if (!response.ok) {
+//                 throw new Error('Failed to create payment order');
+//             }
+
+//             const orderData = await response.json();
+
+//             const options = {
+//                 key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+//                 amount: orderData.amount,
+//                 currency: orderData.currency,
+//                 name: 'Fantasy App',
+//                 description: `Wallet Top-up of ₹${amount}`,
+//                 order_id: orderData.id,
+//                 handler: async (response: any) => {
+//                     try {
+//                         const verificationResponse = await fetch('/api/verify-payment', {
+//                             method: 'POST',
+//                             headers: {
+//                                 'Content-Type': 'application/json',
+//                             },
+//                             body: JSON.stringify({
+//                                 razorpay_payment_id: response.razorpay_payment_id,
+//                                 razorpay_order_id: response.razorpay_order_id,
+//                                 razorpay_signature: response.razorpay_signature,
+//                                 amount: amount
+//                             }),
+//                         });
+
+//                         if (!verificationResponse.ok) {
+//                             throw new Error('Payment verification failed');
+//                         }
+
+//                         const userRef = doc(db, "users", user.id);
+//                         await updateDoc(userRef, {
+//                             credits: currentBalance + amount
+//                         });
+
+//                         onPaymentSuccess(amount);
+//                     } catch (err: any) {
+//                         console.error('Payment processing error:', err);
+//                         setError(err.message || 'Payment failed');
+//                         toast.error('Payment verification failed');
+//                         onOpenChange(true);
+//                     } finally {
+//                         setIsProcessing(false);
+//                         if (onProcessingStateChange) {
+//                             onProcessingStateChange(false);
+//                         }
+//                     }
+//                 },
+//                 prefill: {
+//                     name: user.fullName || '',
+//                     email: user.primaryEmailAddress?.emailAddress || '',
+//                 },
+//                 theme: {
+//                     color: '#4f46e5'
+//                 },
+//                 modal: {
+//                     ondismiss: () => {
+//                         setIsProcessing(false);
+//                         if (onProcessingStateChange) {
+//                             onProcessingStateChange(false);
+//                         }
+//                         toast.info('Payment cancelled');
+//                         onOpenChange(true);
+//                     },
+//                     escape: false,
+//                     backdropclose: false
+//                 }
+//             };
+
+//             const rzp = new window.Razorpay(options);
+//             rzp.open();
+
+//             rzp.on('payment.failed', (response: any) => {
+//                 setError(response.error.description || 'Payment failed');
+//                 toast.error('Payment failed. Please try again.');
+//                 setIsProcessing(false);
+//                 if (onProcessingStateChange) {
+//                     onProcessingStateChange(false);
+//                 }
+//                 onOpenChange(true);
+//             });
+
+//         } catch (err: any) {
+//             console.error('Payment error:', err);
+//             setError(err.message || 'Payment failed');
+//             toast.error('Payment processing failed');
+//             setIsProcessing(false);
+//             if (onProcessingStateChange) {
+//                 onProcessingStateChange(false);
+//             }
+//             onOpenChange(true);
+//         }
+//     };
+
+//     return (
+//         <Dialog open={open} onOpenChange={(open) => !isProcessing && onOpenChange(open)}>
+//             <DialogContent className="max-w-md bg-white rounded-lg shadow-xl z-[1000]">
+//                 <div className="absolute right-4 top-4">
+//                     <button
+//                         onClick={() => !isProcessing && onOpenChange(false)}
+//                         disabled={isProcessing}
+//                         className="rounded-sm opacity-70 hover:opacity-100"
+//                     >
+//                         <X className="h-5 w-5 text-gray-500" />
+//                     </button>
+//                 </div>
+
+//                 <DialogHeader>
+//                     <div className="w-full flex justify-center">
+//                         <DialogTitle className="text-2xl font-bold text-indigo-700 text-center">
+//                             Add To Wallet
+//                         </DialogTitle>
+//                     </div>
+
+//                     <DialogDescription className="text-gray-600 flex justify-between mt-2">
+//                         <span className="font-bold">Current: <span className="font-extrabold text-green-500">₹{currentBalance}</span> </span>
+//                         <span className="ont-bold"> Minimum Required: <span className="font-extrabold text-gray-500">₹{requiredAmount}</span> </span>
+//                     </DialogDescription>
+//                 </DialogHeader>
+
+//                 <div className="space-y-4 py-4">
+//                     <div className="grid grid-cols-2 gap-3">
+//                         {presetAmounts.map((amt) => (
+//                             <Button
+//                                 key={amt}
+//                                 variant={amount === amt ? "outline" : "secondary"}
+//                                 onClick={() => setAmount(Math.max(amt, requiredAmount))}
+//                                 disabled={isProcessing}
+//                                 className="text-black border-gray-300 hover:bg-gray-100 hover:text-black rounded-lg h-12 text-lg font-medium transition-all" 
+//                             >
+//                                 ₹{amt}
+//                             </Button>
+//                         ))}
+//                     </div>
+
+//                     <div className="space-y-2">
+//                         <label className="block text-sm font-medium text-gray-700">
+//                             Custom Amount
+//                         </label>
+//                         <Input
+//                             type="number"
+//                             value={amount}
+//                             onChange={(e) => {
+//                                 const value = Math.max(Number(e.target.value), requiredAmount);
+//                                 setAmount(isNaN(value) ? requiredAmount : value);
+//                             }}
+//                             min={requiredAmount}
+//                             disabled={isProcessing}
+//                             className="text-black placeholder:text-gray-400" 
+//                         />
+//                     </div>
+
+//                     {error && (
+//                         <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md">
+//                             {error}
+//                         </div>
+//                     )}
+
+//                     <Button
+//                         onClick={handlePayment}
+//                         disabled={isProcessing || !scriptLoaded}
+//                         className="w-full h-12 text-lg bg-indigo-700 font-semibold"
+//                     >
+//                         {isProcessing ? (
+//                             <span className="flex items-center justify-center gap-2">
+//                                 <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+//                                 Processing...
+//                             </span>
+//                         ) : (
+//                             <span className="text-white">Pay ₹{amount}</span>
+//                         )}
+//                     </Button>
+//                 </div>
+//             </DialogContent>
+//         </Dialog>
+//     );
+// }
+
+
+
+
+
+
+
+
+
+
+
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -551,270 +843,284 @@ import { toast } from "sonner";
 import { X } from "lucide-react";
 
 declare global {
-    interface Window {
-        Razorpay: any;
-    }
+  interface Window {
+    Razorpay: any;
+  }
 }
 
 const presetAmounts = [1, 500, 1000, 2000];
 
 interface PaymentDialogProps {
-    currentBalance: number;
-    requiredAmount: number;
-    onPaymentSuccess: (amount: number) => void;
-    onOpenChange: (open: boolean) => void;
-    open: boolean;
-    onProcessingStateChange?: (isProcessing: boolean) => void;
+  currentBalance: number;
+  requiredAmount: number;
+  onPaymentSuccess: (amount: number) => void;
+  onOpenChange: (open: boolean) => void;
+  open: boolean;
+  onProcessingStateChange?: (isProcessing: boolean) => void;
 }
 
 export function PaymentDialog({
-    currentBalance,
-    requiredAmount,
-    onPaymentSuccess,
-    onOpenChange,
-    open,
-    onProcessingStateChange,
+  currentBalance,
+  requiredAmount,
+  onPaymentSuccess,
+  onOpenChange,
+  open,
+  onProcessingStateChange,
 }: PaymentDialogProps) {
-    const { user } = useUser();
-    const [amount, setAmount] = useState<number>(Math.max(1, requiredAmount));
-    const [isProcessing, setIsProcessing] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [scriptLoaded, setScriptLoaded] = useState(false);
+  const { user } = useUser();
+  const [amount, setAmount] = useState<number>(Math.max(1, requiredAmount));
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [scriptLoaded, setScriptLoaded] = useState(false);
 
-    useEffect(() => {
-        if (open && typeof window !== 'undefined') {
-            if (window.Razorpay) {
-                setScriptLoaded(true);
-                return;
-            }
+  useEffect(() => {
+    if (open && typeof window !== 'undefined') {
+      if (window.Razorpay) {
+        setScriptLoaded(true);
+        return;
+      }
 
-            const script = document.createElement('script');
-            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-            script.async = true;
-            script.onload = () => setScriptLoaded(true);
-            script.onerror = () => {
-                setError('Failed to load payment system');
-                toast.error('Payment system unavailable. Please refresh.');
-            };
-            document.body.appendChild(script);
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      script.onload = () => setScriptLoaded(true);
+      script.onerror = () => {
+        setError('Failed to load payment system');
+        toast.error('Payment system unavailable. Please refresh.');
+      };
+      document.body.appendChild(script);
 
-            return () => {
-                document.body.removeChild(script);
-            };
-        }
-    }, [open]);
+      return () => {
+        document.body.removeChild(script);
+      };
+    }
+  }, [open]);
 
-    const handlePayment = async () => {
-        if (!user) {
-            setError('Please sign in to make payments');
-            return;
-        }
+  const handlePayment = async () => {
+    if (!user) {
+      setError('Please sign in to make payments');
+      return;
+    }
 
-        if (amount < 1) {
-            setError(`Minimum ₹1 required`);
-            return;
-        }
+    if (amount < 1) {
+      setError('Minimum ₹1 required');
+      return;
+    }
 
-        if (amount < requiredAmount) {
-            setError(`At least ₹${requiredAmount} required for this operation`);
-            return;
-        }
+    setIsProcessing(true);
+    if (onProcessingStateChange) onProcessingStateChange(true);
+    setError(null);
+    onOpenChange(false);
 
-        setIsProcessing(true);
-        if (onProcessingStateChange) {
-            onProcessingStateChange(true);
-        }
-        setError(null);
-        onOpenChange(false);
+    try {
+      const response = await fetch('/api/create-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: amount * 100,
+          currency: 'INR'
+        }),
+      });
 
+      // Handle non-OK responses
+      if (!response.ok) {
+        let errorData = { error: 'Unknown error' };
         try {
-            const response = await fetch('/api/create-order', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    amount: amount * 100,
-                    currency: 'INR'
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to create payment order');
-            }
-
-            const orderData = await response.json();
-
-            const options = {
-                key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-                amount: orderData.amount,
-                currency: orderData.currency,
-                name: 'Fantasy App',
-                description: `Wallet Top-up of ₹${amount}`,
-                order_id: orderData.id,
-                handler: async (response: any) => {
-                    try {
-                        const verificationResponse = await fetch('/api/verify-payment', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                razorpay_payment_id: response.razorpay_payment_id,
-                                razorpay_order_id: response.razorpay_order_id,
-                                razorpay_signature: response.razorpay_signature,
-                                amount: amount
-                            }),
-                        });
-
-                        if (!verificationResponse.ok) {
-                            throw new Error('Payment verification failed');
-                        }
-
-                        const userRef = doc(db, "users", user.id);
-                        await updateDoc(userRef, {
-                            credits: currentBalance + amount
-                        });
-
-                        onPaymentSuccess(amount);
-                    } catch (err: any) {
-                        console.error('Payment processing error:', err);
-                        setError(err.message || 'Payment failed');
-                        toast.error('Payment verification failed');
-                        onOpenChange(true);
-                    } finally {
-                        setIsProcessing(false);
-                        if (onProcessingStateChange) {
-                            onProcessingStateChange(false);
-                        }
-                    }
-                },
-                prefill: {
-                    name: user.fullName || '',
-                    email: user.primaryEmailAddress?.emailAddress || '',
-                },
-                theme: {
-                    color: '#4f46e5'
-                },
-                modal: {
-                    ondismiss: () => {
-                        setIsProcessing(false);
-                        if (onProcessingStateChange) {
-                            onProcessingStateChange(false);
-                        }
-                        toast.info('Payment cancelled');
-                        onOpenChange(true);
-                    },
-                    escape: false,
-                    backdropclose: false
-                }
-            };
-
-            const rzp = new window.Razorpay(options);
-            rzp.open();
-
-            rzp.on('payment.failed', (response: any) => {
-                setError(response.error.description || 'Payment failed');
-                toast.error('Payment failed. Please try again.');
-                setIsProcessing(false);
-                if (onProcessingStateChange) {
-                    onProcessingStateChange(false);
-                }
-                onOpenChange(true);
-            });
-
-        } catch (err: any) {
-            console.error('Payment error:', err);
-            setError(err.message || 'Payment failed');
-            toast.error('Payment processing failed');
-            setIsProcessing(false);
-            if (onProcessingStateChange) {
-                onProcessingStateChange(false);
-            }
-            onOpenChange(true);
+          errorData = await response.json();
+        } catch (e) {
+          console.error('Failed to parse error response:', e);
         }
-    };
+        throw new Error(errorData.error || `Payment failed with status ${response.status}`);
+      }
 
-    return (
-        <Dialog open={open} onOpenChange={(open) => !isProcessing && onOpenChange(open)}>
-            <DialogContent className="max-w-md bg-white rounded-lg shadow-xl z-[1000]">
-                <div className="absolute right-4 top-4">
-                    <button
-                        onClick={() => !isProcessing && onOpenChange(false)}
-                        disabled={isProcessing}
-                        className="rounded-sm opacity-70 hover:opacity-100"
-                    >
-                        <X className="h-5 w-5 text-gray-500" />
-                    </button>
-                </div>
+      // Verify JSON response
+      const contentType = response.headers.get('content-type');
+      if (!contentType?.includes('application/json')) {
+        const text = await response.text();
+        console.error('Non-JSON response:', text);
+        throw new Error('Server returned unexpected response format');
+      }
 
-                <DialogHeader>
-                    <div className="w-full flex justify-center">
-                        <DialogTitle className="text-2xl font-bold text-indigo-700 text-center">
-                            Add To Wallet
-                        </DialogTitle>
-                    </div>
+      const orderData = await response.json();
 
-                    <DialogDescription className="text-gray-600 flex justify-between mt-2">
-                        <span className="font-bold">Current: <span className="font-extrabold text-green-500">₹{currentBalance}</span> </span>
-                        <span className="ont-bold"> Minimum Required: <span className="font-extrabold text-gray-500">₹{requiredAmount}</span> </span>
-                    </DialogDescription>
-                </DialogHeader>
+      // Validate order data structure
+      if (!orderData?.id || !orderData.amount) {
+        throw new Error('Invalid order data received from server');
+      }
 
-                <div className="space-y-4 py-4">
-                    <div className="grid grid-cols-2 gap-3">
-                        {presetAmounts.map((amt) => (
-                            <Button
-                                key={amt}
-                                variant={amount === amt ? "outline" : "secondary"}
-                                onClick={() => setAmount(Math.max(amt, requiredAmount))}
-                                disabled={isProcessing}
-                                className="text-black border-gray-300 hover:bg-gray-100 hover:text-black rounded-lg h-12 text-lg font-medium transition-all" 
-                            >
-                                ₹{amt}
-                            </Button>
-                        ))}
-                    </div>
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'Fantasy App',
+        description: `Wallet Top-up of ₹${amount}`,
+        order_id: orderData.id,
+        handler: async (response: any) => {
+          try {
+            const verificationResponse = await fetch('/api/create-order', {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+                amount: amount
+              }),
+            });
 
-                    <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">
-                            Custom Amount
-                        </label>
-                        <Input
-                            type="number"
-                            value={amount}
-                            onChange={(e) => {
-                                const value = Math.max(Number(e.target.value), requiredAmount);
-                                setAmount(isNaN(value) ? requiredAmount : value);
-                            }}
-                            min={requiredAmount}
-                            disabled={isProcessing}
-                            className="text-black placeholder:text-gray-400" 
-                        />
-                    </div>
+            if (!verificationResponse.ok) {
+              throw new Error('Payment verification failed');
+            }
 
-                    {error && (
-                        <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md">
-                            {error}
-                        </div>
-                    )}
+            const verificationData = await verificationResponse.json();
 
-                    <Button
-                        onClick={handlePayment}
-                        disabled={isProcessing || !scriptLoaded}
-                        className="w-full h-12 text-lg bg-indigo-700 font-semibold"
-                    >
-                        {isProcessing ? (
-                            <span className="flex items-center justify-center gap-2">
-                                <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
-                                Processing...
-                            </span>
-                        ) : (
-                            <span className="text-white">Pay ₹{amount}</span>
-                        )}
-                    </Button>
-                </div>
-            </DialogContent>
-        </Dialog>
-    );
+            if (!verificationData?.success) {
+              throw new Error(verificationData.error || 'Payment verification failed');
+            }
+
+            const userRef = doc(db, "users", user.id);
+            await updateDoc(userRef, {
+              credits: currentBalance + amount
+            });
+
+            onPaymentSuccess(amount);
+            toast.success(`₹${amount} added to your wallet!`);
+          } catch (err: any) {
+            console.error('Payment verification error:', err);
+            setError(err.message || 'Payment verification failed');
+            toast.error('Payment failed. Please contact support.');
+            onOpenChange(true);
+          } finally {
+            setIsProcessing(false);
+            if (onProcessingStateChange) onProcessingStateChange(false);
+          }
+        },
+        prefill: {
+          name: user.fullName || '',
+          email: user.primaryEmailAddress?.emailAddress || '',
+          contact: user.primaryPhoneNumber?.phoneNumber || '',
+        },
+        theme: {
+          color: '#4f46e5'
+        },
+        modal: {
+          ondismiss: () => {
+            setIsProcessing(false);
+            if (onProcessingStateChange) onProcessingStateChange(false);
+            toast.info('Payment cancelled');
+            onOpenChange(true);
+          },
+          escape: false,
+          backdropclose: false
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+
+      rzp.on('payment.failed', (response: any) => {
+        console.error('Payment failed:', response.error);
+        setError(response.error.description || 'Payment failed. Please try again.');
+        toast.error('Payment failed. Please try again or use another method.');
+        setIsProcessing(false);
+        if (onProcessingStateChange) onProcessingStateChange(false);
+        onOpenChange(true);
+      });
+
+    } catch (err: any) {
+      console.error('Payment error:', err);
+      setError(err.message || 'Payment processing failed');
+      toast.error(err.message || 'Payment failed. Please try again.');
+      setIsProcessing(false);
+      if (onProcessingStateChange) onProcessingStateChange(false);
+      onOpenChange(true);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(open) => !isProcessing && onOpenChange(open)}>
+      <DialogContent className="max-w-md bg-white rounded-lg shadow-xl z-[1000]">
+        <div className="absolute right-4 top-4">
+          <button
+            onClick={() => !isProcessing && onOpenChange(false)}
+            disabled={isProcessing}
+            className="rounded-sm opacity-70 hover:opacity-100"
+          >
+            <X className="h-5 w-5 text-gray-500" />
+          </button>
+        </div>
+
+        <DialogHeader>
+          <div className="w-full flex justify-center">
+            <DialogTitle className="text-2xl font-bold text-indigo-700 text-center">
+              Add To Wallet
+            </DialogTitle>
+          </div>
+
+          <DialogDescription className="text-gray-600 flex justify-between mt-2">
+            <span className="font-bold">Current: <span className="font-extrabold text-green-500">₹{currentBalance}</span></span>
+            <span className="font-bold">Minimum: <span className="font-extrabold text-gray-500">₹{requiredAmount}</span></span>
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 py-4">
+          <div className="grid grid-cols-2 gap-3">
+            {presetAmounts.map((amt) => (
+              <Button
+                key={amt}
+                variant={amount === amt ? "outline" : "secondary"}
+                onClick={() => setAmount(Math.max(amt, requiredAmount))}
+                disabled={isProcessing}
+                className="text-black border-gray-300 hover:bg-gray-100 hover:text-black rounded-lg h-12 text-lg font-medium transition-all" 
+              >
+                ₹{amt}
+              </Button>
+            ))}
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Custom Amount
+            </label>
+            <Input
+              type="number"
+              value={amount}
+              onChange={(e) => {
+                const value = Math.max(Number(e.target.value), requiredAmount);
+                setAmount(isNaN(value) ? requiredAmount : value);
+              }}
+              min={requiredAmount}
+              disabled={isProcessing}
+              className="text-black placeholder:text-gray-400" 
+            />
+          </div>
+
+          {error && (
+            <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md">
+              {error}
+            </div>
+          )}
+
+          <Button
+            onClick={handlePayment}
+            disabled={isProcessing || !scriptLoaded}
+            className="w-full h-12 text-lg bg-indigo-700 font-semibold"
+          >
+            {isProcessing ? (
+              <span className="flex items-center justify-center gap-2">
+                <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+                Processing...
+              </span>
+            ) : (
+              <span className="text-white">Pay ₹{amount}</span>
+            )}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 }
