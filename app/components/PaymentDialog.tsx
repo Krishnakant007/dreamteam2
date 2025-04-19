@@ -265,7 +265,7 @@ declare global {
     }
 }
 
-const presetAmounts = [100,500,1000,2000];
+const presetAmounts = [1,500,1000,2000];
 
 interface PaymentDialogProps {
     currentBalance: number;
@@ -285,7 +285,7 @@ export function PaymentDialog({
     onProcessingStateChange,
 }: PaymentDialogProps) {
     const { user } = useUser();
-    const [amount, setAmount] = useState<number>(Math.max(requiredAmount, 100));
+    const [amount, setAmount] = useState<number>(Math.max(requiredAmount, 1));
     const [isProcessing, setIsProcessing] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [scriptLoaded, setScriptLoaded] = useState(false);
