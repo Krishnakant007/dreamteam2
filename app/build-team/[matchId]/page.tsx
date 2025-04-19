@@ -20319,6 +20319,432 @@
 
 
 
+// "use client";
+
+// import { useEffect, useState } from "react";
+// import { useParams } from "next/navigation";
+// import { doc, onSnapshot } from "firebase/firestore";
+// import { db } from "@/lib/firebase";
+// import Header from "@/components/Header";
+// import { format, isValid } from "date-fns";
+// import { enIN } from "date-fns/locale";
+// import MatchHeader from "@/components/MatchHeader";
+// import RiskSlider from "@/components/RiskSlider";
+// import TeamCountSlider from "@/components/TeamCountSlider";
+// import TeamCard from "@/components/TeamCard";
+// import { useTeamGenerator } from "@/components/TeamGenerator";
+// import { useUser } from "@clerk/nextjs";
+// import Link from "next/link";
+
+// interface Player {
+//   id: number;
+//   name: string;
+//   role: string;
+//   substitute?: boolean;
+//   imgURL?: string;
+//   teamName?: string;
+//   teamShortName?: string;
+// }
+
+// interface Team {
+//   id: number;
+//   name: string;
+//   logo?: string;
+//   playerDetails: Player[];
+//   shortName?: string;
+// }
+
+// interface TossResults {
+//   tossWinnerId?: number;
+//   tossWinnerName?: string;
+//   decision?: string;
+//   announcedAt?: Date | string;
+// }
+
+// interface Venue {
+//   name: string;
+//   city: string;
+//   pitchtype?: string;
+//   avgscore?: string;
+// }
+
+// interface MatchInfo {
+//   matchId: number;
+//   team1?: Team;
+//   team2?: Team;
+//   venue?: Venue;
+//   tossResults?: TossResults;
+//   matchDescription?: string;
+//   matchFormat?: string;
+//   matchType?: string;
+// }
+
+// interface MatchData {
+//   matchInfo: MatchInfo;
+// }
+
+// interface GeneratedTeam {
+//   id: number;
+//   players: Player[];
+//   captain: Player;
+//   viceCaptain: Player;
+//   substitutes?: Player[];
+//   riskLevel?: number;
+//   team1ShortName?: string;
+//   team2ShortName?: string;
+//   changes?: number;
+// }
+
+// export default function MatchPage() {
+//   const params = useParams();
+//   const matchId = params?.matchId 
+//     ? (Array.isArray(params.matchId) ? params.matchId[0] : params.matchId)
+//     : null;
+
+//   const { user } = useUser();
+//   const [matchData, setMatchData] = useState<MatchData | null>(null);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState<string | null>(null);
+//   const [userBalance, setUserBalance] = useState(0);
+//   const [riskLevel, setRiskLevel] = useState(50);
+//   const [teamCount, setTeamCount] = useState(5);
+
+//   const {
+//     generatedTeams,
+//     isGenerating,
+//     generateButton,
+//     paymentDialog,
+//     error: teamError,
+//     fetchSavedTeams,
+//     setGeneratedTeams,
+//     checkLineupChanges
+//   } = useTeamGenerator({
+//     team1: matchData?.matchInfo?.team1,
+//     team2: matchData?.matchInfo?.team2,
+//     teamCount,
+//     riskLevel,
+//     userBalance,
+//     onBalanceUpdate: setUserBalance,
+//     matchId: matchId ? Number(matchId) : 0
+//   });
+
+//   useEffect(() => {
+//     if (!matchId) return;
+
+//     setLoading(true);
+//     const unsubscribeMatch = onSnapshot(
+//       doc(db, "matchinfo", matchId.toString()),
+//       (docSnap) => {
+//         try {
+//           setLoading(false);
+//           if (docSnap.exists()) {
+//             const data = docSnap.data();
+//             const processedData: MatchData = {
+//               matchInfo: {
+//                 ...data.matchInfo,
+//                 matchId: Number(data.matchInfo.matchId),
+//                 team1: data.matchInfo.team1 ? {
+//                   ...data.matchInfo.team1,
+//                   id: Number(data.matchInfo.team1.id),
+//                   playerDetails: data.matchInfo.team1.playerDetails?.map((p: any) => ({
+//                     ...p,
+//                     id: Number(p.id)
+//                   })) || []
+//                 } : undefined,
+//                 team2: data.matchInfo.team2 ? {
+//                   ...data.matchInfo.team2,
+//                   id: Number(data.matchInfo.team2.id),
+//                   playerDetails: data.matchInfo.team2.playerDetails?.map((p: any) => ({
+//                     ...p,
+//                     id: Number(p.id)
+//                   })) || []
+//                 } : undefined,
+//                 tossResults: data.matchInfo.tossResults ? {
+//                   ...data.matchInfo.tossResults,
+//                   tossWinnerId: data.matchInfo.tossResults.tossWinnerId 
+//                     ? Number(data.matchInfo.tossResults.tossWinnerId)
+//                     : undefined
+//                 } : undefined
+//               }
+//             };
+//             setMatchData(processedData);
+//             checkLineupChanges();
+//           } else {
+//             setMatchData(null);
+//           }
+//         } catch (err) {
+//           setError("Failed to process match data");
+//           console.error("Data processing error:", err);
+//         }
+//       },
+//       (err) => {
+//         setLoading(false);
+//         setError("Failed to load match data");
+//         console.error("Error loading match data:", err);
+//       }
+//     );
+
+//     let unsubscribeUser = () => {};
+//     if (user?.id) {
+//       unsubscribeUser = onSnapshot(
+//         doc(db, "users", user.id),
+//         (docSnap) => {
+//           try {
+//             setUserBalance(docSnap.exists() ? Number(docSnap.data().credits) || 0 : 0);
+//           } catch (err) {
+//             console.error("Failed to parse user balance:", err);
+//           }
+//         },
+//         (err) => {
+//           console.error("Failed to load user balance:", err);
+//         }
+//       );
+//     }
+
+//     return () => {
+//       unsubscribeMatch();
+//       unsubscribeUser();
+//     };
+//   }, [matchId, user, checkLineupChanges]);
+
+//   useEffect(() => {
+//     const loadSavedTeams = async () => {
+//       try {
+//         if (user && matchId) {
+//           const savedTeams = await fetchSavedTeams();
+//           setGeneratedTeams(savedTeams.map((team: any) => ({
+//             ...team,
+//             id: Number(team.id),
+//             players: team.players.map((p: any) => ({
+//               ...p,
+//               id: Number(p.id)
+//             })),
+//             captain: {
+//               ...team.captain,
+//               id: Number(team.captain.id)
+//             },
+//             viceCaptain: {
+//               ...team.viceCaptain,
+//               id: Number(team.viceCaptain.id)
+//             },
+//             substitutes: team.substitutes?.map((s: any) => ({
+//               ...s,
+//               id: Number(s.id)
+//             })) || []
+//           })));
+//         }
+//       } catch (err) {
+//         console.error("Failed to load saved teams:", err);
+//       }
+//     };
+
+//     loadSavedTeams();
+//   }, [user, matchId, fetchSavedTeams, setGeneratedTeams]);
+
+//   const formatDateSafely = (date: unknown) => {
+//     try {
+//       if (!date) return "Not available";
+//       const dateObj = new Date(date as string);
+//       return isValid(dateObj) 
+//         ? format(dateObj, "h:mm a, MMMM d, yyyy", { locale: enIN })
+//         : "Invalid date";
+//     } catch {
+//       return "Not available";
+//     }
+//   };
+
+//   const preparePlayers = (team?: Team) => {
+//     if (!team?.playerDetails) return [];
+//     return team.playerDetails.map((player, index) => ({
+//       ...player,
+//       id: player.id || index,
+//       substitute: player.substitute || false,
+//       imgURL: player.imgURL || '/fallback-player.png'
+//     }));
+//   };
+
+//   if (!matchId) {
+//     return (
+//       <div className="bg-gray-900 min-h-screen text-white p-6">
+//         <Header />
+//         <div className="container mx-auto py-6">
+//           <div className="bg-red-500 text-white p-4 rounded-lg">
+//             <h2 className="text-xl font-bold">Invalid Match URL</h2>
+//             <p className="mt-2">The match ID could not be found in the URL.</p>
+//             <Link href="/" className="text-blue-300 hover:text-blue-200 mt-4 inline-block">
+//               ← Return to matches list
+//             </Link>
+//           </div>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   if (loading) {
+//     return (
+//       <div className="bg-gray-900 min-h-screen text-white">
+//         <Header />
+//         <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
+//           <div className="flex flex-col items-center">
+//             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+//             <p className="text-white">Loading match details...</p>
+//           </div>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   if (error) {
+//     return (
+//       <div className="bg-gray-900 min-h-screen text-white">
+//         <Header />
+//         <div className="p-6 text-red-500">{error}</div>
+//       </div>
+//     );
+//   }
+
+//   if (!matchData?.matchInfo) {
+//     return (
+//       <div className="bg-gray-900 min-h-screen text-white">
+//         <Header />
+//         <div className="p-6 text-white">No match data found.</div>
+//       </div>
+//     );
+//   }
+
+//   const { matchInfo } = matchData;
+//   const { team1, team2 } = matchInfo;
+
+//   return (
+//     <div className="bg-gray-900 min-h-screen text-white">
+//       <Header />
+//       <div className="w-full px-4 mx-auto max-w-7xl">
+//         <MatchHeader matchInfo={matchInfo} />
+        
+//         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 w-full">
+//           <div className="md:col-span-2 space-y-4 w-full">
+//             <div className="bg-gray-800 p-4 rounded-lg w-full">
+//               <h2 className="text-xl font-bold mb-4">Team Configuration</h2>
+//               <div className="space-y-6">
+//                 <RiskSlider value={riskLevel} onChange={setRiskLevel} />
+//                 <TeamCountSlider value={teamCount} onChange={setTeamCount} />
+//                 {generateButton}
+//                 {paymentDialog}
+//                 {teamError && <div className="text-red-500">{teamError}</div>}
+//               </div>
+//             </div>
+
+//             {isGenerating ? (
+//               <div className="bg-gray-800 p-6 rounded-lg flex items-center justify-center h-40 w-full">
+//                 <div className="flex flex-col items-center">
+//                   <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500 mb-2"></div>
+//                   <p className="text-gray-400">Generating teams...</p>
+//                 </div>
+//               </div>
+//             ) : generatedTeams.length > 0 ? (
+//               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+//                 {generatedTeams.map((team, index) => (
+//                   <TeamCard
+//                     key={`${matchId}-${index}`}
+//                     team={{
+//                       ...team,
+//                       id: Number(team.id)
+//                     }}
+//                     index={index}
+//                     isSelected={false}
+//                     onToggleSelect={() => {}}
+//                     onUpdateTeam={() => {}}
+//                   />
+//                 ))}
+//               </div>
+//             ) : (
+//               <div className="bg-gray-800 p-6 rounded-lg w-full">
+//                 <h2 className="text-xl font-bold mb-4">No Teams Generated Yet</h2>
+//                 <p className="text-gray-400">Adjust settings and generate teams</p>
+//               </div>
+//             )}
+//           </div>
+
+//           <div className="bg-gray-800 p-4 rounded-lg w-full">
+//             <h2 className="text-xl font-bold mb-4">Match Info</h2>
+//             {matchInfo.venue && (
+//               <div className="mb-4">
+//                 <h3 className="font-semibold text-lg">Venue</h3>
+//                 <p>{matchInfo.venue.name}, {matchInfo.venue.city}</p>
+//                 <p className="text-sm text-gray-400">
+//                   Pitch: {matchInfo.venue.pitchtype || "Unknown"} | 
+//                   Avg. Score: {matchInfo.venue.avgscore || "N/A"}
+//                 </p>
+//               </div>
+//             )}
+            
+//             {matchInfo.tossResults && (
+//               <div className="mb-4">
+//                 <h3 className="font-semibold text-lg">Toss Result</h3>
+//                 <p>
+//                   {matchInfo.tossResults.tossWinnerName || "TBD"} won the toss and chose to {matchInfo.tossResults.decision || "TBD"}
+//                 </p>
+//                 {matchInfo.tossResults.announcedAt && (
+//                   <p className="text-sm text-gray-400">
+//                     {formatDateSafely(matchInfo.tossResults.announcedAt)}
+//                   </p>
+//                 )}
+//               </div>
+//             )}
+
+//             <div className="mt-6">
+//               <h3 className="font-semibold text-lg mb-2">Team Squads</h3>
+//               <div className="space-y-4">
+//                 {[team1, team2].filter(Boolean).map((team) => (
+//                   <div key={team?.id} className="bg-gray-700 p-3 rounded">
+//                     <h4 className="font-medium flex items-center">
+//                       <img 
+//                         src={team?.logo || "/fallback.png"} 
+//                         alt={team?.name} 
+//                         className="w-6 h-6 mr-2" 
+//                         onError={(e) => (e.currentTarget as HTMLImageElement).src = '/fallback.png'}
+//                       />
+//                       {team?.name}
+//                     </h4>
+//                     <div className="text-sm mt-2 space-y-1">
+//                       {preparePlayers(team)
+//                         .sort((a, b) => (a.substitute === b.substitute) ? 0 : a.substitute ? 1 : -1)
+//                         .map(player => (
+//                           <div key={player.id} className="flex items-center">
+//                             <span className={`inline-block w-2 h-2 rounded-full mr-2 ${
+//                               player.substitute ? 'bg-red-500' : 'bg-green-500'
+//                             }`} />
+//                             <img 
+//                               src={player.imgURL} 
+//                               alt={player.name} 
+//                               className="w-4 h-4 mr-2 rounded-full object-cover"
+//                               onError={(e) => (e.currentTarget as HTMLImageElement).src = '/fallback-player.png'}
+//                             />
+//                             <span className={player.substitute ? 'text-gray-400' : ''}>
+//                               {player.name} ({player.role})
+//                               {player.substitute && ' (Sub)'}
+//                             </span>
+//                           </div>
+//                         ))}
+//                     </div>
+//                   </div>
+//                 ))}
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+//       {paymentDialog}
+//     </div>
+//   );
+// }
+
+
+
+
+
+
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -20336,65 +20762,6 @@ import { useTeamGenerator } from "@/components/TeamGenerator";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 
-interface Player {
-  id: number;
-  name: string;
-  role: string;
-  substitute?: boolean;
-  imgURL?: string;
-  teamName?: string;
-  teamShortName?: string;
-}
-
-interface Team {
-  id: number;
-  name: string;
-  logo?: string;
-  playerDetails: Player[];
-  shortName?: string;
-}
-
-interface TossResults {
-  tossWinnerId?: number;
-  tossWinnerName?: string;
-  decision?: string;
-  announcedAt?: Date | string;
-}
-
-interface Venue {
-  name: string;
-  city: string;
-  pitchtype?: string;
-  avgscore?: string;
-}
-
-interface MatchInfo {
-  matchId: number;
-  team1?: Team;
-  team2?: Team;
-  venue?: Venue;
-  tossResults?: TossResults;
-  matchDescription?: string;
-  matchFormat?: string;
-  matchType?: string;
-}
-
-interface MatchData {
-  matchInfo: MatchInfo;
-}
-
-interface GeneratedTeam {
-  id: number;
-  players: Player[];
-  captain: Player;
-  viceCaptain: Player;
-  substitutes?: Player[];
-  riskLevel?: number;
-  team1ShortName?: string;
-  team2ShortName?: string;
-  changes?: number;
-}
-
 export default function MatchPage() {
   const params = useParams();
   const matchId = params?.matchId 
@@ -20402,7 +20769,7 @@ export default function MatchPage() {
     : null;
 
   const { user } = useUser();
-  const [matchData, setMatchData] = useState<MatchData | null>(null);
+  const [matchData, setMatchData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userBalance, setUserBalance] = useState(0);
@@ -20415,9 +20782,7 @@ export default function MatchPage() {
     generateButton,
     paymentDialog,
     error: teamError,
-    fetchSavedTeams,
-    setGeneratedTeams,
-    checkLineupChanges
+    setGeneratedTeams
   } = useTeamGenerator({
     team1: matchData?.matchInfo?.team1,
     team2: matchData?.matchInfo?.team2,
@@ -20425,7 +20790,7 @@ export default function MatchPage() {
     riskLevel,
     userBalance,
     onBalanceUpdate: setUserBalance,
-    matchId: matchId ? Number(matchId) : 0
+    matchId: matchId || ''
   });
 
   useEffect(() => {
@@ -20433,42 +20798,13 @@ export default function MatchPage() {
 
     setLoading(true);
     const unsubscribeMatch = onSnapshot(
-      doc(db, "matchinfo", matchId.toString()),
+      doc(db, "matchinfo", matchId),
       (docSnap) => {
         try {
           setLoading(false);
           if (docSnap.exists()) {
             const data = docSnap.data();
-            const processedData: MatchData = {
-              matchInfo: {
-                ...data.matchInfo,
-                matchId: Number(data.matchInfo.matchId),
-                team1: data.matchInfo.team1 ? {
-                  ...data.matchInfo.team1,
-                  id: Number(data.matchInfo.team1.id),
-                  playerDetails: data.matchInfo.team1.playerDetails?.map((p: any) => ({
-                    ...p,
-                    id: Number(p.id)
-                  })) || []
-                } : undefined,
-                team2: data.matchInfo.team2 ? {
-                  ...data.matchInfo.team2,
-                  id: Number(data.matchInfo.team2.id),
-                  playerDetails: data.matchInfo.team2.playerDetails?.map((p: any) => ({
-                    ...p,
-                    id: Number(p.id)
-                  })) || []
-                } : undefined,
-                tossResults: data.matchInfo.tossResults ? {
-                  ...data.matchInfo.tossResults,
-                  tossWinnerId: data.matchInfo.tossResults.tossWinnerId 
-                    ? Number(data.matchInfo.tossResults.tossWinnerId)
-                    : undefined
-                } : undefined
-              }
-            };
-            setMatchData(processedData);
-            checkLineupChanges();
+            setMatchData(data);
           } else {
             setMatchData(null);
           }
@@ -20505,33 +20841,16 @@ export default function MatchPage() {
       unsubscribeMatch();
       unsubscribeUser();
     };
-  }, [matchId, user, checkLineupChanges]);
+  }, [matchId, user]);
 
   useEffect(() => {
     const loadSavedTeams = async () => {
       try {
         if (user && matchId) {
-          const savedTeams = await fetchSavedTeams();
-          setGeneratedTeams(savedTeams.map((team: any) => ({
-            ...team,
-            id: Number(team.id),
-            players: team.players.map((p: any) => ({
-              ...p,
-              id: Number(p.id)
-            })),
-            captain: {
-              ...team.captain,
-              id: Number(team.captain.id)
-            },
-            viceCaptain: {
-              ...team.viceCaptain,
-              id: Number(team.viceCaptain.id)
-            },
-            substitutes: team.substitutes?.map((s: any) => ({
-              ...s,
-              id: Number(s.id)
-            })) || []
-          })));
+          const savedTeams = localStorage.getItem(`matchTeams_${matchId}_${user.id}`);
+          if (savedTeams) {
+            setGeneratedTeams(JSON.parse(savedTeams));
+          }
         }
       } catch (err) {
         console.error("Failed to load saved teams:", err);
@@ -20539,7 +20858,7 @@ export default function MatchPage() {
     };
 
     loadSavedTeams();
-  }, [user, matchId, fetchSavedTeams, setGeneratedTeams]);
+  }, [user, matchId, setGeneratedTeams]);
 
   const formatDateSafely = (date: unknown) => {
     try {
@@ -20551,16 +20870,6 @@ export default function MatchPage() {
     } catch {
       return "Not available";
     }
-  };
-
-  const preparePlayers = (team?: Team) => {
-    if (!team?.playerDetails) return [];
-    return team.playerDetails.map((player, index) => ({
-      ...player,
-      id: player.id || index,
-      substitute: player.substitute || false,
-      imgURL: player.imgURL || '/fallback-player.png'
-    }));
   };
 
   if (!matchId) {
@@ -20646,14 +20955,19 @@ export default function MatchPage() {
                 {generatedTeams.map((team, index) => (
                   <TeamCard
                     key={`${matchId}-${index}`}
-                    team={{
-                      ...team,
-                      id: Number(team.id)
-                    }}
+                    team={team}
                     index={index}
                     isSelected={false}
                     onToggleSelect={() => {}}
-                    onUpdateTeam={() => {}}
+                    onUpdateTeam={(updatedTeam) => {
+                      const updatedTeams = [...generatedTeams];
+                      updatedTeams[index] = updatedTeam;
+                      setGeneratedTeams(updatedTeams);
+                      localStorage.setItem(
+                        `matchTeams_${matchId}_${user?.id}`,
+                        JSON.stringify(updatedTeams)
+                      );
+                    }}
                   />
                 ))}
               </div>
@@ -20699,33 +21013,39 @@ export default function MatchPage() {
                   <div key={team?.id} className="bg-gray-700 p-3 rounded">
                     <h4 className="font-medium flex items-center">
                       <img 
-                        src={team?.logo || "/fallback.png"} 
+                        src={team?.logo || "/fallback-team.png"} 
                         alt={team?.name} 
-                        className="w-6 h-6 mr-2" 
-                        onError={(e) => (e.currentTarget as HTMLImageElement).src = '/fallback.png'}
+                        className="w-6 h-6 mr-2 object-contain"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = '/fallback-team.png';
+                          target.onerror = null;
+                        }}
                       />
                       {team?.name}
                     </h4>
                     <div className="text-sm mt-2 space-y-1">
-                      {preparePlayers(team)
-                        .sort((a, b) => (a.substitute === b.substitute) ? 0 : a.substitute ? 1 : -1)
-                        .map(player => (
-                          <div key={player.id} className="flex items-center">
-                            <span className={`inline-block w-2 h-2 rounded-full mr-2 ${
-                              player.substitute ? 'bg-red-500' : 'bg-green-500'
-                            }`} />
-                            <img 
-                              src={player.imgURL} 
-                              alt={player.name} 
-                              className="w-4 h-4 mr-2 rounded-full object-cover"
-                              onError={(e) => (e.currentTarget as HTMLImageElement).src = '/fallback-player.png'}
-                            />
-                            <span className={player.substitute ? 'text-gray-400' : ''}>
-                              {player.name} ({player.role})
-                              {player.substitute && ' (Sub)'}
-                            </span>
-                          </div>
-                        ))}
+                      {team?.playerDetails?.map((player: any) => (
+                        <div key={player.id} className="flex items-center">
+                          <span className={`inline-block w-2 h-2 rounded-full mr-2 ${
+                            player.substitute ? 'bg-red-500' : 'bg-green-500'
+                          }`} />
+                          <img 
+                            src={player.imgURL || "/fallback-player.png"} 
+                            alt={player.name} 
+                            className="w-4 h-4 mr-2 rounded-full object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = '/fallback-player.png';
+                              target.onerror = null;
+                            }}
+                          />
+                          <span className={player.substitute ? 'text-gray-400' : ''}>
+                            {player.name} ({player.role})
+                            {player.substitute && ' (Sub)'}
+                          </span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ))}
@@ -20734,7 +21054,6 @@ export default function MatchPage() {
           </div>
         </div>
       </div>
-      {paymentDialog}
     </div>
   );
 }
