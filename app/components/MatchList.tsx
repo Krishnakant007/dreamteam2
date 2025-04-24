@@ -1118,7 +1118,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 
 // Fallback images
 const FALLBACK_BANNER = "/fallback-banner.jpg";
-const FALLBACK_TEAM = "/fallback-team.png";
+const FALLBACK_TEAM = "/fallback2.webp"; 
 const FALLBACK_ICON = "/fallback-icon.png";
 
 const categories = [
