@@ -13,24 +13,87 @@
 
 
 
+// // app/metadata.ts
+// import type { Metadata } from 'next';
+
+// export const metadata: Metadata = {
+//   title: 'Fashtra | AI Team Generator for Dream11 & IPL 2025',
+//   description: 'Build AI-powered IPL Dream11 fantasy teams in seconds. Fashtra helps you generate winning cricket teams using real stats and advanced AI.',
+//   keywords: ['Fashtra', 'AI Team Generator', 'Dream11 AI Team', 'IPL 2025 Fantasy', 'AI Cricket Team Builder'],
+//   authors: [{ name: 'Fashtra Team', url: 'https://fashtra.com' }],
+//   creator: 'Fashtra',
+//   openGraph: {
+//     title: 'Fashtra | AI Dream11 Team Generator',
+//     description: 'Generate IPL Dream11 fantasy teams with AI. Just ₹5 per team. Fast, smart, and data-driven.',
+//     url: 'https://fashtra.com',
+//     siteName: 'Fashtra',
+//     type: 'website',
+//     images: [
+//       {
+//         url: 'https://fashtra.com/og-image.png', // 👈 Replace with your OG image
+//         width: 1200,
+//         height: 630,
+//         alt: 'Fashtra AI Team Generator',
+//       },
+//     ],
+//   },
+//   twitter: {
+//     card: 'summary_large_image',
+//     title: 'Fashtra | AI Team Generator',
+//     description: 'Generate AI-powered IPL teams. Make better Dream11 picks.',
+//     images: ['https://fashtra.com/og-image.png'], // 👈 Replace this too
+//     creator: '@FashtraOfficial', // optional
+//   },
+//   icons: {
+//     icon: '/favicon.png', // ✅ Favicon
+//     shortcut: '/favicon.png',
+//     apple: '/favicon.png',
+//   },
+// };
+
+
+
+
+
+
+
+
+
+
+
+
 // app/metadata.ts
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Fashtra | AI Team Generator for Dream11 & IPL 2025',
-  description: 'Build AI-powered IPL Dream11 fantasy teams in seconds. Fashtra helps you generate winning cricket teams using real stats and advanced AI.',
-  keywords: ['Fashtra', 'AI Team Generator', 'Dream11 AI Team', 'IPL 2025 Fantasy', 'AI Cricket Team Builder'],
+  title: 'Fashtra | AI Dream11 Team Generator for IPL 2025',
+  description:
+    'Fashtra is your ultimate AI-powered Dream11 team generator for IPL 2025. Build winning fantasy cricket teams using smart data-driven AI in seconds.',
+  keywords: [
+    'Fashtra',
+    'fashtra.com',
+    'Dream11 Team Generator',
+    'AI Dream11 Teams',
+    'IPL 2025 Fantasy',
+    'AI Cricket Team Builder',
+    'Best Dream11 Prediction',
+    'Fantasy Cricket AI',
+    'Fashtra Dream11',
+    'Fashtra IPL Team',
+  ],
   authors: [{ name: 'Fashtra Team', url: 'https://fashtra.com' }],
   creator: 'Fashtra',
+  metadataBase: new URL('https://fashtra.com'),
   openGraph: {
-    title: 'Fashtra | AI Dream11 Team Generator',
-    description: 'Generate IPL Dream11 fantasy teams with AI. Just ₹5 per team. Fast, smart, and data-driven.',
+    title: 'Fashtra | AI Dream11 Team Generator for IPL 2025',
+    description:
+      'Generate winning Dream11 fantasy teams with AI for IPL 2025. Fast, smart, data-powered team builder. Try Fashtra today.',
     url: 'https://fashtra.com',
     siteName: 'Fashtra',
     type: 'website',
     images: [
       {
-        url: 'https://fashtra.com/og-image.png', // 👈 Replace with your OG image
+        url: 'https://fashtra.com/og-image.png',
         width: 1200,
         height: 630,
         alt: 'Fashtra AI Team Generator',
@@ -39,14 +102,26 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Fashtra | AI Team Generator',
-    description: 'Generate AI-powered IPL teams. Make better Dream11 picks.',
-    images: ['https://fashtra.com/og-image.png'], // 👈 Replace this too
-    creator: '@FashtraOfficial', // optional
+    title: 'Fashtra | AI Dream11 Team Generator for IPL 2025',
+    description:
+      'Build your Dream11 team with AI for IPL 2025. Fashtra helps you win with data-driven predictions.',
+    images: ['https://fashtra.com/og-image.png'],
+    creator: '@FashtraOfficial',
   },
   icons: {
-    icon: '/favicon.png', // ✅ Favicon
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: [
+      {
+        url: '/apple-touch-icon.png',
+        sizes: '180x180',
+        type: 'image/png',
+      },
+    ],
     shortcut: '/favicon.png',
-    apple: '/favicon.png',
   },
+  manifest: '/site.webmanifest',
 };
