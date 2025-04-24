@@ -556,90 +556,19 @@
 // }
 
 
-// // app/layout.tsx
-// import { ClerkProvider } from '@clerk/nextjs';
-// import { GeistSans } from 'geist/font/sans';
-// import { GeistMono } from 'geist/font/mono';
-// import './globals.css';
-// import ClientLayout from './ClientLayout';
-// import { metadata } from './metadata';
-// import Script from 'next/script'; // ✅ import Script
-
-// export { metadata };
-
-// export default function RootLayout({ children }: { children: React.ReactNode }) {
-//   return (
-//     <ClerkProvider
-//       publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY!}
-//       appearance={{ variables: { colorPrimary: '#000000' } }}
-//     >
-//       <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
-//         <head>
-//           {/* ✅ Google Tag (gtag.js) */}
-//           <Script async src="https://www.googletagmanager.com/gtag/js?id=AW-16980292455" />
-//           <Script id="google-tag" strategy="afterInteractive">
-//             {`
-//               window.dataLayer = window.dataLayer || [];
-//               function gtag(){dataLayer.push(arguments);}
-//               gtag('js', new Date());
-
-//               gtag('config', 'AW-16980292455');
-//             `}
-//           </Script>
-//           {/* ✅ End Google Tag */}
-
-//         </head>
-//         <body className="antialiased bg-black text-white" suppressHydrationWarning>
-//           {/* ✅ Meta Pixel Script */}
-//           <Script id="meta-pixel" strategy="afterInteractive">
-//             {`
-//               !function(f,b,e,v,n,t,s)
-//               {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-//               n.callMethod.apply(n,arguments):n.queue.push(arguments)}; 
-//               if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0'; 
-//               n.queue=[];t=b.createElement(e);t.async=!0; 
-//               t.src=v;s=b.getElementsByTagName(e)[0]; 
-//               s.parentNode.insertBefore(t,s)}(window, document,'script', 
-//               'https://connect.facebook.net/en_US/fbevents.js'); 
-//               fbq('init', '1220006036465105'); 
-//               fbq('track', 'PageView');
-//             `}
-//           </Script>
-
-//           <noscript>
-//             <img
-//               height="1"
-//               width="1"
-//               style={{ display: 'none' }}
-//               src="https://www.facebook.com/tr?id=1220006036465105&ev=PageView&noscript=1"
-//             />
-//           </noscript>
-//           {/* ✅ End Meta Pixel */}
-
-//           <ClientLayout>{children}</ClientLayout>
-//         </body>
-//       </html>
-//     </ClerkProvider>
-//   );
-// }
 
 
 
 
 
-
-
-
-
-
-
+// app/layout.tsx
 import { ClerkProvider } from '@clerk/nextjs';
 import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
 import './globals.css';
 import ClientLayout from './ClientLayout';
 import { metadata } from './metadata';
-import Script from 'next/script';
+import Script from 'next/script'; // ✅ import Script
 
 export { metadata };
 
@@ -647,51 +576,26 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <ClerkProvider
       publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY!}
-      appearance={{ 
-        variables: { colorPrimary: '#000000' },
-        elements: {
-          providerIcon__google: { filter: 'none' },
-          formButtonPrimary: 'bg-black hover:bg-gray-900',
-          socialButtonsBlockButton: 'border-gray-200 hover:bg-gray-50'
-        }
-      }}
-      localization={{
-        socialButtonsBlockButton: 'Continue with {{provider|titleize}}'
-      }}
+      appearance={{ variables: { colorPrimary: '#000000' } }}
     >
       <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
         <head>
-          {/* Preload Clerk resources */}
-          <link rel="preconnect" href="https://clerk.example.com" />
-          <link rel="preconnect" href="https://clerk.com" crossOrigin="anonymous" />
-          <link rel="preload" href="/_next/static/clerk.js" as="script" />
-          
-          {/* Clerk preload optimization */}
-          <Script id="clerk-preload" strategy="beforeInteractive">
-            {`
-              window.__clerk_preload_options = {
-                socialProviderPriority: ['google'],
-                standardProviderPriority: ['email_address'],
-                preloadUser: true,
-                preloadSignUp: true,
-                preloadSignIn: true
-              };
-            `}
-          </Script>
-
-          {/* Google Tag */}
+          {/* ✅ Google Tag (gtag.js) */}
           <Script async src="https://www.googletagmanager.com/gtag/js?id=AW-16980292455" />
           <Script id="google-tag" strategy="afterInteractive">
             {`
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
+
               gtag('config', 'AW-16980292455');
             `}
           </Script>
+          {/* ✅ End Google Tag */}
+
         </head>
         <body className="antialiased bg-black text-white" suppressHydrationWarning>
-          {/* Meta Pixel Script */}
+          {/* ✅ Meta Pixel Script */}
           <Script id="meta-pixel" strategy="afterInteractive">
             {`
               !function(f,b,e,v,n,t,s)
@@ -706,6 +610,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               fbq('track', 'PageView');
             `}
           </Script>
+
           <noscript>
             <img
               height="1"
@@ -714,6 +619,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               src="https://www.facebook.com/tr?id=1220006036465105&ev=PageView&noscript=1"
             />
           </noscript>
+          {/* ✅ End Meta Pixel */}
 
           <ClientLayout>{children}</ClientLayout>
         </body>
@@ -721,3 +627,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </ClerkProvider>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
