@@ -279,7 +279,6 @@
 
 
 
-import React from 'react';
 
 export interface PlayerDetail {
   id: number;
