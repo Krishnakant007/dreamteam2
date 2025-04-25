@@ -505,6 +505,7 @@ export interface MatchInfo {
   venue?: Venue;
 }
 
+
 export interface MatchData {
   matchInfo: MatchInfo;
 }
