@@ -162,15 +162,133 @@
 
 
 
-// types/match.ts
+
+
+
+// // types/match.ts
+// export interface PlayerDetail {
+//   id: number;
+//   name: string;
+//   fullName: string;
+//   nickName: string;
+//   role: string;
+//   captain: boolean;
+//   viceCaptain?: boolean
+//   keeper: boolean;
+//   isOverseas: boolean;
+//   battingStyle?: string;
+//   bowlingStyle?: string;
+//   teamName?: string;
+//   substitute?: boolean;
+//   imgURL?: string;
+//   selectedBy?: number;
+//   riskScore?: number;
+//   roleOrder?: number;
+//   wasSubstituted?: boolean;
+//   teamShortName?: string;
+//   isNowSubstitute?: boolean;
+//   replacedPlayer?: string;
+//   selCapPerc?: number;
+//   selVcPerc?: number;
+//   isPlaying?: boolean;
+//   points?: number;
+//   baseScore?: number;
+ 
+// }
+
+// export interface Team {
+//   id: number;
+//   name: string;
+//   logo?: string;
+//   playerDetails: PlayerDetail[];
+//   shortName: string;
+// }
+
+// export interface TossResults {
+//   tossWinnerId: number;
+//   decision: string;
+//   tossWinnerName: string;
+//   announcedAt?: string;
+// }
+
+// export interface Venue {
+//   name: string;
+//   city: string;
+//   country: string;
+//   ground?: string;
+//   avgscore?: string;
+//   pitchtype?: string;
+// }
+
+// export interface MatchInfo {
+//   matchId: number;
+//   matchDescription: string;
+//   matchFormat: string;
+//   matchType: string;
+//   complete: boolean;
+//   domestic: boolean;
+//   matchStartTimestamp: number;
+//   matchCompleteTimestamp: number;
+//   dayNight: boolean;
+//   year: number;
+//   state: string;
+//   tossResults?: TossResults;
+//   team1?: Team;
+//   team2?: Team;
+//   venue?: Venue;
+// }
+
+// export interface MatchData {
+//   matchInfo: MatchInfo;
+// }
+
+// export interface GeneratedTeam {
+//   id: string | number;
+//   name?: string;
+//   players: PlayerDetail[];
+//   captain: PlayerDetail;
+//   viceCaptain: PlayerDetail;
+//   teamName: string;
+//   changes?: number;
+//   substitutes?: PlayerDetail[];
+//   team1ShortName?: string;
+//   team2ShortName?: string;
+//   riskLevel?: number;
+//   hadChanges?: boolean;
+//   createdAt?: string;
+//   updatedAt?: string;
+//   userId?: string;
+//   userEmail?: string;
+//   matchName?: string;
+//   matchId?: string;
+//   team1Logo?: string;
+//   team2Logo?: string;
+//   team1Count?: number;
+//   team2Count?: number;
+//   wkCount?: number;
+//   batCount?: number;
+//   arCount?: number;
+//   bowlCount?: number;
+//   teamComposition?: Record<string, number>;
+// }
+
+
+
+
+
+
+
+
+import React from 'react';
+
 export interface PlayerDetail {
   id: number;
   name: string;
   fullName: string;
-  nickName: string;
+  nickName?: string;
   role: string;
   captain: boolean;
-  viceCaptain?: boolean
+  viceCaptain?: boolean;
   keeper: boolean;
   isOverseas: boolean;
   battingStyle?: string;
@@ -190,7 +308,6 @@ export interface PlayerDetail {
   isPlaying?: boolean;
   points?: number;
   baseScore?: number;
- 
 }
 
 export interface Team {
@@ -199,44 +316,6 @@ export interface Team {
   logo?: string;
   playerDetails: PlayerDetail[];
   shortName: string;
-}
-
-export interface TossResults {
-  tossWinnerId: number;
-  decision: string;
-  tossWinnerName: string;
-  announcedAt?: string;
-}
-
-export interface Venue {
-  name: string;
-  city: string;
-  country: string;
-  ground?: string;
-  avgscore?: string;
-  pitchtype?: string;
-}
-
-export interface MatchInfo {
-  matchId: number;
-  matchDescription: string;
-  matchFormat: string;
-  matchType: string;
-  complete: boolean;
-  domestic: boolean;
-  matchStartTimestamp: number;
-  matchCompleteTimestamp: number;
-  dayNight: boolean;
-  year: number;
-  state: string;
-  tossResults?: TossResults;
-  team1?: Team;
-  team2?: Team;
-  venue?: Venue;
-}
-
-export interface MatchData {
-  matchInfo: MatchInfo;
 }
 
 export interface GeneratedTeam {
@@ -267,4 +346,33 @@ export interface GeneratedTeam {
   arCount?: number;
   bowlCount?: number;
   teamComposition?: Record<string, number>;
+}
+
+export interface TeamGeneratorProps {
+  team1?: Team;
+  team2?: Team;
+  teamCount: number;
+  riskLevel: number;
+  userBalance: number;
+  onBalanceUpdate: (newBalance: number) => void;
+  matchId: string;
+}
+
+export interface TeamGeneratorReturn {
+  generatedTeams: GeneratedTeam[];
+  isGenerating: boolean;
+  generateButton: React.ReactNode;
+  paymentDialog: React.ReactNode | null;
+  error: string | null;
+  setError: (error: string | null) => void;
+  fetchSavedTeams: () => Promise<GeneratedTeam[]>;
+  setGeneratedTeams: (teams: GeneratedTeam[]) => void;
+  checkLineupChanges: () => Promise<void>;
+}
+
+export interface RoleCounts {
+  wk: number;
+  batsmen: number;
+  allrounders: number;
+  bowlers: number;
 }
