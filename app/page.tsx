@@ -126,95 +126,6 @@
 
 
 
-// "use client";
-
-// import { useUser } from "@clerk/nextjs";
-// import { useEffect } from "react";
-// import { doc, setDoc, getDoc, increment } from "firebase/firestore";
-// import { db } from "@/lib/firebase";
-// import MatchList from "./components/MatchList";
-// import { toast } from "sonner";
-// import Script from "next/script"; // ✅ Import Script
-
-// export default function Home() {
-//   const { user } = useUser();
-
-//   useEffect(() => {
-//     const createUserIfNotExists = async () => {
-//       if (user) {
-//         const userRef = doc(db, "users", user.id);
-//         const docSnap = await getDoc(userRef);
-
-//         const userData = {
-//           id: user.id,
-//           email: user.emailAddresses[0]?.emailAddress || '',
-//           name: user.fullName || '',
-//           createdAt: new Date().toISOString(),
-//           credits: 100,
-//           firstTimeBonusGiven: true,
-//         };
-
-//         if (!docSnap.exists()) {
-//           await setDoc(userRef, userData);
-//           toast.success("Welcome! ₹100 bonus credits added to your account");
-//         } else if (!docSnap.data().firstTimeBonusGiven) {
-//           await setDoc(userRef, {
-//             ...userData,
-//             credits: increment(100),
-//             firstTimeBonusGiven: true
-//           }, { merge: true });
-//           toast.success("₹100 bonus credits added to your account");
-//         }
-
-//         localStorage.setItem("user", JSON.stringify({
-//           ...userData,
-//           credits: docSnap.exists() ? 
-//             (docSnap.data().firstTimeBonusGiven ? 
-//               docSnap.data().credits : 
-//               (docSnap.data().credits || 0) + 100) : 
-//             100
-//         }));
-//       }
-//     };
-
-//     createUserIfNotExists();
-//   }, [user]);
-
-//   return (
-//     <>
-//       {/* ✅ Google Ads conversion tracking */}
-//       <Script async src="https://www.googletagmanager.com/gtag/js?id=AW-16980292455" />
-//       <Script id="google-conversion" strategy="afterInteractive">
-//         {`
-//           window.dataLayer = window.dataLayer || [];
-//           function gtag(){dataLayer.push(arguments);}
-//           gtag('js', new Date());
-//           gtag('config', 'AW-16980292455');
-
-//           gtag('event', 'conversion', {
-//               'send_to': 'AW-16980292455/Okt9CILHwLUaEOfm6qA_',
-//               'value': 1.0,
-//               'currency': 'INR',
-//               'transaction_id': ''
-//           });
-//         `}
-//       </Script>
-
-//       <div>
-//         <MatchList />
-//       </div>
-//     </>
-//   );
-// }
-
-
-
-
-
-
-
-
-
 "use client";
 
 import { useUser } from "@clerk/nextjs";
@@ -223,7 +134,7 @@ import { doc, setDoc, getDoc, increment } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import MatchList from "./components/MatchList";
 import { toast } from "sonner";
-import Script from "next/script";
+import Script from "next/script"; // ✅ Import Script
 
 export default function Home() {
   const { user } = useUser();
@@ -231,37 +142,22 @@ export default function Home() {
   useEffect(() => {
     const createUserIfNotExists = async () => {
       if (user) {
-        // First try to get user by original ID (for backward compatibility)
-        const originalUserRef = doc(db, "users", user.id);
-        const docSnap = await getDoc(originalUserRef);
-        
-        // If user exists with old ID, use that and don't change anything
-        if (docSnap.exists()) {
-          localStorage.setItem("user", JSON.stringify(docSnap.data()));
-          return;
-        }
-        
-        // If user doesn't exist, create with new email-based ID
-        const email = user.emailAddresses[0]?.emailAddress || '';
-        const emailPrefix = email.split('@')[0] || 'user';
-        const newUserId = `${emailPrefix}_${user.id}`;
-        const userRef = doc(db, "users", newUserId);
-        const newUserSnap = await getDoc(userRef);
+        const userRef = doc(db, "users", user.id);
+        const docSnap = await getDoc(userRef);
 
         const userData = {
-          id: newUserId,
-          originalId: user.id, // Store original ID for reference
-          email: email,
+          id: user.id,
+          email: user.emailAddresses[0]?.emailAddress || '',
           name: user.fullName || '',
           createdAt: new Date().toISOString(),
           credits: 100,
           firstTimeBonusGiven: true,
         };
 
-        if (!newUserSnap.exists()) {
+        if (!docSnap.exists()) {
           await setDoc(userRef, userData);
           toast.success("Welcome! ₹100 bonus credits added to your account");
-        } else if (!newUserSnap.data().firstTimeBonusGiven) {
+        } else if (!docSnap.data().firstTimeBonusGiven) {
           await setDoc(userRef, {
             ...userData,
             credits: increment(100),
@@ -272,10 +168,10 @@ export default function Home() {
 
         localStorage.setItem("user", JSON.stringify({
           ...userData,
-          credits: newUserSnap.exists() ? 
-            (newUserSnap.data().firstTimeBonusGiven ? 
-              newUserSnap.data().credits : 
-              (newUserSnap.data().credits || 0) + 100) : 
+          credits: docSnap.exists() ? 
+            (docSnap.data().firstTimeBonusGiven ? 
+              docSnap.data().credits : 
+              (docSnap.data().credits || 0) + 100) : 
             100
         }));
       }
@@ -286,6 +182,7 @@ export default function Home() {
 
   return (
     <>
+      {/* ✅ Google Ads conversion tracking */}
       <Script async src="https://www.googletagmanager.com/gtag/js?id=AW-16980292455" />
       <Script id="google-conversion" strategy="afterInteractive">
         {`
@@ -309,6 +206,11 @@ export default function Home() {
     </>
   );
 }
+
+
+
+
+
 
 
 
