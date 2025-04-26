@@ -1733,7 +1733,7 @@ import { doc, updateDoc } from "firebase/firestore";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { X } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+// import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
 
 declare global {
