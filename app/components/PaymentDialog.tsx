@@ -1721,6 +1721,8 @@
 
 
 
+
+
 // PaymentDialog.tsx
 "use client";
 
@@ -2022,12 +2024,7 @@ export function PaymentDialog({
             )}
           </div>
 
-          <Alert className="bg-yellow-50 border-yellow-200">
-            <Info className="h-4 w-4 text-yellow-600" />
-            <AlertDescription className="text-yellow-800">
-              <span className="font-bold">Warning:</span> Do not press back button or refresh until payment is completed.
-            </AlertDescription>
-          </Alert>
+        
 
           {error && (
             <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md">
