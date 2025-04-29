@@ -21407,7 +21407,7 @@ import Header from "@/components/Header";
 import { format, isValid } from "date-fns";
 import { enIN } from "date-fns/locale";
 import MatchHeader from "@/components/MatchHeader";
-import RiskSlider from "@/components/RiskSlider";
+// import RiskSlider from "@/components/RiskSlider";
 import TeamCountSlider from "@/components/TeamCountSlider";
 import TeamCard from "@/components/TeamCard";
 import { useTeamGenerator } from "@/components/TeamGenerator";
@@ -21605,7 +21605,7 @@ export default function MatchPage() {
             <div className="bg-gray-800 p-4 rounded-lg w-full">
               <h2 className="text-xl font-bold mb-4">Team Configuration</h2>
               <div className="space-y-6">
-                <RiskSlider value={riskLevel} onChange={setRiskLevel} />
+{/*                 <RiskSlider value={riskLevel} onChange={setRiskLevel} /> */}
                 <TeamCountSlider value={teamCount} onChange={setTeamCount} />
                 {generateButton}
                 {paymentDialog}
