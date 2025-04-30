@@ -504,8 +504,9 @@ export interface TeamGeneratorReturn {
   fetchSavedTeams: () => Promise<GeneratedTeam[]>;
   setGeneratedTeams: (teams: GeneratedTeam[]) => void;
   checkLineupChanges: () => Promise<void>;
-  leagueType: "H2H" | "MEGA"; // <-- Add this line
-  setLeagueType: React.Dispatch<React.SetStateAction<'H2H' | 'MEGA'>>; // ✅ add this
+  leagueType: "H2H" | "MEGA"; 
+  setLeagueType: React.Dispatch<React.SetStateAction<'H2H' | 'MEGA'>>;
+  
 }
 
 export interface RoleCounts {
