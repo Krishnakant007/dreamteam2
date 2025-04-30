@@ -377,6 +377,9 @@
 // }
 
 
+
+
+
 // types/match.ts
 
 export interface PlayerDetail {
@@ -504,8 +507,8 @@ export interface TeamGeneratorReturn {
   fetchSavedTeams: () => Promise<GeneratedTeam[]>;
   setGeneratedTeams: (teams: GeneratedTeam[]) => void;
   checkLineupChanges: () => Promise<void>;
-  leagueType: "H2H" | "MEGA"; 
-  setLeagueType: React.Dispatch<React.SetStateAction<'H2H' | 'MEGA'>>;
+  leagueType: "H2H" | "MEGA"; // <-- Add this line
+  setLeagueType: React.Dispatch<React.SetStateAction<'H2H' | 'MEGA'>>; // ✅ add this
   
 }
 
@@ -515,4 +518,6 @@ export interface RoleCounts {
   allrounders: number;
   bowlers: number;
 }
+
+
 
