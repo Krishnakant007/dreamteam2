@@ -15891,7 +15891,6 @@
 
 
 
-
 "use client";
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { PaymentDialog } from "./PaymentDialog";
@@ -16005,7 +16004,6 @@ export const useTeamGenerator = ({
   const getPredefinedTeam = (): GeneratedTeam | null => {
     if (!team1 || !team2) return null;
 
-    // Create a function to find player by name
     const findPlayer = (name: string): PlayerDetail => {
       const allPlayers = [...(team1.playerDetails || []), ...(team2.playerDetails || [])];
       const player = allPlayers.find(p => {
@@ -16019,150 +16017,200 @@ export const useTeamGenerator = ({
         ...defaultPlayer,
         id: -1 * Date.now(),
         name: name.split('-')[0],
-        role: name.includes('-C') ? 'Batsman' : 
+        role: name.includes('-C') ? 'Allrounder' : 
               name.includes('-Vc') ? 'Batsman' : 
-              name.includes('W Hasaranga') ? 'Bowling Allrounder' :
-              name.includes('Axar') ? 'Bowling Allrounder' :
-              name.includes('Avesh Khan') ? 'Bowler' :
-              name.includes('Thakur') ? 'Bowler' :
-              name.includes('Jofra Archer') ? 'Bowler' :
-              name.includes('Tushar Deshpande') ? 'Bowler' :
+              name.includes('Buttler') ? 'WK-Batsman' :
+              name.includes('Klaasen') ? 'WK-Batsman' :
+              name.includes('Head') ? 'Batsman' :
+              name.includes('Gill') ? 'Batsman' :
+              name.includes('Reddy') ? 'Allrounder' :
+              name.includes('Sudharsan') ? 'Batsman' :
+              name.includes('Abhishek') ? 'Allrounder' :
+              name.includes('Unadkat') ? 'Bowler' :
+              name.includes('Cummins') ? 'Bowler' :
               name.includes('Prasidh') ? 'Bowler' :
               name.includes('Siraj') ? 'Bowler' :
-              name.includes('Sai Kishore') ? 'Bowler' :
-              name.includes('Mitchell Santner') ? 'Bowling Allrounder' :
-              name.includes('Hardik Pandya') ? 'Bowling Allrounder' :
-              name.includes('Deepak Chahar') ? 'Bowler' :
-              name.includes('Jasprit Bumrah') ? 'Bowler' :
-              name.includes('Krunal Pandya') ? 'Bowling Allrounder' :
-              name.includes('Marco Jansen') ? 'Bowling Allrounder' :
-              name.includes('Chahal') ? 'Bowler' :
-              name.includes('Arshdeep Singh') ? 'Bowler' :
-              name.includes('Harpreet Brar') ? 'Bowler' :
-              name.includes('Suyash Sharma') ? 'Bowler' :
               'Batsman'
       };
     };
 
-    if (matchId === "115291") {
-        const players = [
-          findPlayer("Ryan Rickelton-Vc"),
-          findPlayer("Rohit Sharma"),
-          findPlayer("Suryakumar Yadav"),
-          findPlayer("Hardik Pandya-C"),
-          findPlayer("Riyan Parag"),
-          findPlayer("Karn Sharma"),
-          findPlayer("Deepak Chahar"),
-          findPlayer("Trent Boult"),
-          findPlayer("Jasprit Bumrah"),
-          findPlayer("Jofra Archer"),
-          findPlayer("Maheesh Theekshana")
-        ];
-      
-        const captain = players.find(p => p.name.includes("Hardik")) || players[0];
-        const viceCaptain = players.find(p => p.name.includes("Rickelton")) || players[1];
-      
-        return {
-          id: Date.now(),
-          players: players.sort((a, b) => getRoleOrder(a.role) - getRoleOrder(b.role)),
-          captain,
-          viceCaptain,
-          substitutes: [],
-          teamName: "Predefined Team 115291",
-          team1ShortName: team1.shortName || 'T1',
-          team2ShortName: team2.shortName || 'T2',
-          riskLevel,
-          matchId,
-          matchName: `${team1.name} vs ${team2.name}`,
-          createdAt: new Date().toISOString(),
-          changes: 0,
-          hadChanges: false,
-          userId: user?.id || '',
-          userEmail: user?.primaryEmailAddress?.emailAddress || '',
-          team1Logo: team1.logo || '/fallback-team.png',
-          team2Logo: team2.logo || '/fallback-team.png',
-          team1Count: players.filter(p => p.teamShortName === team1.shortName).length,
-          team2Count: players.filter(p => p.teamShortName === team2.shortName).length,
-          wkCount: players.filter(p => normalizeRole(p.role) === 'WK-Batsman').length,
-          batCount: players.filter(p => 
-            ['Batsman', 'Batting Allrounder'].includes(normalizeRole(p.role))
-          ).length,
-          arCount: players.filter(p => normalizeRole(p.role) === 'Bowling Allrounder').length,
-          bowlCount: players.filter(p => normalizeRole(p.role) === 'Bowler').length,
-          teamComposition: {
-            'WK-Batsman': players.filter(p => normalizeRole(p.role) === 'WK-Batsman').length,
-            'Batsman': players.filter(p => normalizeRole(p.role) === 'Batsman').length,
-            'Batting Allrounder': players.filter(p => normalizeRole(p.role) === 'Batting Allrounder').length,
-            'Bowling Allrounder': players.filter(p => normalizeRole(p.role) === 'Bowling Allrounder').length,
-            'Bowler': players.filter(p => normalizeRole(p.role) === 'Bowler').length,
-            [team1.shortName || 'T1']: players.filter(p => p.teamShortName === team1.shortName).length,
-            [team2.shortName || 'T2']: players.filter(p => p.teamShortName === team2.shortName).length,
-            overseas: players.filter(p => p.isOverseas).length,
-            totalScore: players.reduce((sum, p) => sum + (p.selectedBy || 0), 0)
-          }
-        };
-      }
-      
-      if (matchId === "515282") {
-        const players = [
-          findPlayer("Prabhsimran"),
-          findPlayer("Shreyas Iyer"),
-          findPlayer("Priyansh Arya"),
-          findPlayer("Dewald Brevis"),
-          findPlayer("Ravindra Jadeja"),
-          findPlayer("Sam Curran-C"),
-          findPlayer("Marco Jansen"),
-          findPlayer("Yuzvendra Chahal-Vc"),
-          findPlayer("Khaleel Ahmed"),
-          findPlayer("Arshdeep Singh"),
-          findPlayer("Matheesha Pathirana")
-        ];
-      
-        const captain = players.find(p => p.name.includes("Sam Curran")) || players[0];
-        const viceCaptain = players.find(p => p.name.includes("Chahal")) || players[1];
-      
-        return {
-          id: Date.now(),
-          players: players.sort((a, b) => getRoleOrder(a.role) - getRoleOrder(b.role)),
-          captain,
-          viceCaptain,
-          substitutes: [],
-          teamName: "Predefined Team 515282",
-          team1ShortName: team1.shortName || 'T1',
-          team2ShortName: team2.shortName || 'T2',
-          riskLevel,
-          matchId,
-          matchName: `${team1.name} vs ${team2.name}`,
-          createdAt: new Date().toISOString(),
-          changes: 0,
-          hadChanges: false,
-          userId: user?.id || '',
-          userEmail: user?.primaryEmailAddress?.emailAddress || '',
-          team1Logo: team1.logo || '/fallback-team.png',
-          team2Logo: team2.logo || '/fallback-team.png',
-          team1Count: players.filter(p => p.teamShortName === team1.shortName).length,
-          team2Count: players.filter(p => p.teamShortName === team2.shortName).length,
-          wkCount: players.filter(p => normalizeRole(p.role) === 'WK-Batsman').length,
-          batCount: players.filter(p => 
-            ['Batsman', 'Batting Allrounder'].includes(normalizeRole(p.role))
-          ).length,
-          arCount: players.filter(p => normalizeRole(p.role) === 'Bowling Allrounder').length,
-          bowlCount: players.filter(p => normalizeRole(p.role) === 'Bowler').length,
-          teamComposition: {
-            'WK-Batsman': players.filter(p => normalizeRole(p.role) === 'WK-Batsman').length,
-            'Batsman': players.filter(p => normalizeRole(p.role) === 'Batsman').length,
-            'Batting Allrounder': players.filter(p => normalizeRole(p.role) === 'Batting Allrounder').length,
-            'Bowling Allrounder': players.filter(p => normalizeRole(p.role) === 'Bowling Allrounder').length,
-            'Bowler': players.filter(p => normalizeRole(p.role) === 'Bowler').length,
-            [team1.shortName || 'T1']: players.filter(p => p.teamShortName === team1.shortName).length,
-            [team2.shortName || 'T2']: players.filter(p => p.teamShortName === team2.shortName).length,
-            overseas: players.filter(p => p.isOverseas).length,
-            totalScore: players.reduce((sum, p) => sum + (p.selectedBy || 0), 0)
-          }
-        };
-      }
+    if (matchId === "115300") {
+      const players = [
+        findPlayer("Jos Buttler"),
+        findPlayer("Heinrich Klaasen"),
+        findPlayer("Travis Head"),
+        findPlayer("Shubman Gill-Vc"),
+        findPlayer("Nitish Reddy"),
+        findPlayer("Sai Sudharsan"),
+        findPlayer("Abhishek Sharma-C"),
+        findPlayer("Jaydev Unadkat"),
+        findPlayer("Pat Cummins"),
+        findPlayer("Prasidh Krishna"),
+        findPlayer("Mohammed Siraj")
+      ];
+    
+      const captain = players.find(p => p.name.includes("Abhishek")) || players[0];
+      const viceCaptain = players.find(p => p.name.includes("Gill")) || players[1];
+    
+      return {
+        id: Date.now(),
+        players: players.sort((a, b) => getRoleOrder(a.role) - getRoleOrder(b.role)),
+        captain,
+        viceCaptain,
+        substitutes: [],
+        teamName: "Expert's Choice (115300)",
+        team1ShortName: team1.shortName || 'T1',
+        team2ShortName: team2.shortName || 'T2',
+        riskLevel,
+        matchId,
+        matchName: `${team1.name} vs ${team2.name}`,
+        createdAt: new Date().toISOString(),
+        changes: 0,
+        hadChanges: false,
+        userId: user?.id || '',
+        userEmail: user?.primaryEmailAddress?.emailAddress || '',
+        team1Logo: team1.logo || '/fallback-team.png',
+        team2Logo: team2.logo || '/fallback-team.png',
+        team1Count: players.filter(p => p.teamShortName === team1.shortName).length,
+        team2Count: players.filter(p => p.teamShortName === team2.shortName).length,
+        wkCount: players.filter(p => normalizeRole(p.role) === 'WK-Batsman').length,
+        batCount: players.filter(p => 
+          ['Batsman', 'Batting Allrounder'].includes(normalizeRole(p.role))
+        ).length,
+        arCount: players.filter(p => normalizeRole(p.role) === 'Bowling Allrounder').length,
+        bowlCount: players.filter(p => normalizeRole(p.role) === 'Bowler').length,
+        teamComposition: {
+          'WK-Batsman': players.filter(p => normalizeRole(p.role) === 'WK-Batsman').length,
+          'Batsman': players.filter(p => normalizeRole(p.role) === 'Batsman').length,
+          'Batting Allrounder': players.filter(p => normalizeRole(p.role) === 'Batting Allrounder').length,
+          'Bowling Allrounder': players.filter(p => normalizeRole(p.role) === 'Bowling Allrounder').length,
+          'Bowler': players.filter(p => normalizeRole(p.role) === 'Bowler').length,
+          [team1.shortName || 'T1']: players.filter(p => p.teamShortName === team1.shortName).length,
+          [team2.shortName || 'T2']: players.filter(p => p.teamShortName === team2.shortName).length,
+          overseas: players.filter(p => p.isOverseas).length,
+          totalScore: players.reduce((sum, p) => sum + (p.selectedBy || 0), 0)
+        }
+      };
+    }
 
-  
+    if (matchId === "115291") {
+      const players = [
+        findPlayer("Ryan Rickelton-Vc"),
+        findPlayer("Rohit Sharma"),
+        findPlayer("Suryakumar Yadav"),
+        findPlayer("Hardik Pandya-C"),
+        findPlayer("Riyan Parag"),
+        findPlayer("Karn Sharma"),
+        findPlayer("Deepak Chahar"),
+        findPlayer("Trent Boult"),
+        findPlayer("Jasprit Bumrah"),
+        findPlayer("Jofra Archer"),
+        findPlayer("Maheesh Theekshana")
+      ];
+    
+      const captain = players.find(p => p.name.includes("Hardik")) || players[0];
+      const viceCaptain = players.find(p => p.name.includes("Rickelton")) || players[1];
+    
+      return {
+        id: Date.now(),
+        players: players.sort((a, b) => getRoleOrder(a.role) - getRoleOrder(b.role)),
+        captain,
+        viceCaptain,
+        substitutes: [],
+        teamName: "Predefined Team 115291",
+        team1ShortName: team1.shortName || 'T1',
+        team2ShortName: team2.shortName || 'T2',
+        riskLevel,
+        matchId,
+        matchName: `${team1.name} vs ${team2.name}`,
+        createdAt: new Date().toISOString(),
+        changes: 0,
+        hadChanges: false,
+        userId: user?.id || '',
+        userEmail: user?.primaryEmailAddress?.emailAddress || '',
+        team1Logo: team1.logo || '/fallback-team.png',
+        team2Logo: team2.logo || '/fallback-team.png',
+        team1Count: players.filter(p => p.teamShortName === team1.shortName).length,
+        team2Count: players.filter(p => p.teamShortName === team2.shortName).length,
+        wkCount: players.filter(p => normalizeRole(p.role) === 'WK-Batsman').length,
+        batCount: players.filter(p => 
+          ['Batsman', 'Batting Allrounder'].includes(normalizeRole(p.role))
+        ).length,
+        arCount: players.filter(p => normalizeRole(p.role) === 'Bowling Allrounder').length,
+        bowlCount: players.filter(p => normalizeRole(p.role) === 'Bowler').length,
+        teamComposition: {
+          'WK-Batsman': players.filter(p => normalizeRole(p.role) === 'WK-Batsman').length,
+          'Batsman': players.filter(p => normalizeRole(p.role) === 'Batsman').length,
+          'Batting Allrounder': players.filter(p => normalizeRole(p.role) === 'Batting Allrounder').length,
+          'Bowling Allrounder': players.filter(p => normalizeRole(p.role) === 'Bowling Allrounder').length,
+          'Bowler': players.filter(p => normalizeRole(p.role) === 'Bowler').length,
+          [team1.shortName || 'T1']: players.filter(p => p.teamShortName === team1.shortName).length,
+          [team2.shortName || 'T2']: players.filter(p => p.teamShortName === team2.shortName).length,
+          overseas: players.filter(p => p.isOverseas).length,
+          totalScore: players.reduce((sum, p) => sum + (p.selectedBy || 0), 0)
+        }
+      };
+    }
+    
+    if (matchId === "515282") {
+      const players = [
+        findPlayer("Prabhsimran"),
+        findPlayer("Shreyas Iyer"),
+        findPlayer("Priyansh Arya"),
+        findPlayer("Dewald Brevis"),
+        findPlayer("Ravindra Jadeja"),
+        findPlayer("Sam Curran-C"),
+        findPlayer("Marco Jansen"),
+        findPlayer("Yuzvendra Chahal-Vc"),
+        findPlayer("Khaleel Ahmed"),
+        findPlayer("Arshdeep Singh"),
+        findPlayer("Matheesha Pathirana")
+      ];
+    
+      const captain = players.find(p => p.name.includes("Sam Curran")) || players[0];
+      const viceCaptain = players.find(p => p.name.includes("Chahal")) || players[1];
+    
+      return {
+        id: Date.now(),
+        players: players.sort((a, b) => getRoleOrder(a.role) - getRoleOrder(b.role)),
+        captain,
+        viceCaptain,
+        substitutes: [],
+        teamName: "Predefined Team 515282",
+        team1ShortName: team1.shortName || 'T1',
+        team2ShortName: team2.shortName || 'T2',
+        riskLevel,
+        matchId,
+        matchName: `${team1.name} vs ${team2.name}`,
+        createdAt: new Date().toISOString(),
+        changes: 0,
+        hadChanges: false,
+        userId: user?.id || '',
+        userEmail: user?.primaryEmailAddress?.emailAddress || '',
+        team1Logo: team1.logo || '/fallback-team.png',
+        team2Logo: team2.logo || '/fallback-team.png',
+        team1Count: players.filter(p => p.teamShortName === team1.shortName).length,
+        team2Count: players.filter(p => p.teamShortName === team2.shortName).length,
+        wkCount: players.filter(p => normalizeRole(p.role) === 'WK-Batsman').length,
+        batCount: players.filter(p => 
+          ['Batsman', 'Batting Allrounder'].includes(normalizeRole(p.role))
+        ).length,
+        arCount: players.filter(p => normalizeRole(p.role) === 'Bowling Allrounder').length,
+        bowlCount: players.filter(p => normalizeRole(p.role) === 'Bowler').length,
+        teamComposition: {
+          'WK-Batsman': players.filter(p => normalizeRole(p.role) === 'WK-Batsman').length,
+          'Batsman': players.filter(p => normalizeRole(p.role) === 'Batsman').length,
+          'Batting Allrounder': players.filter(p => normalizeRole(p.role) === 'Batting Allrounder').length,
+          'Bowling Allrounder': players.filter(p => normalizeRole(p.role) === 'Bowling Allrounder').length,
+          'Bowler': players.filter(p => normalizeRole(p.role) === 'Bowler').length,
+          [team1.shortName || 'T1']: players.filter(p => p.teamShortName === team1.shortName).length,
+          [team2.shortName || 'T2']: players.filter(p => p.teamShortName === team2.shortName).length,
+          overseas: players.filter(p => p.isOverseas).length,
+          totalScore: players.reduce((sum, p) => sum + (p.selectedBy || 0), 0)
+        }
+      };
+    }
+
     return null;
   };
 
