@@ -113,8 +113,6 @@
 
 
 
-
-
 interface TeamCountSliderProps {
   value: number;
   onChange: (value: number) => void;
@@ -128,9 +126,11 @@ export default function TeamCountSlider({ value, onChange }: TeamCountSliderProp
 
   const basePrice = value * 100;
 
-  // 50% OFF applies only for exactly 10 teams
-  const isDiscount = value === 10;
-  const discountedPrice = 500;
+  const isDiscount10 = value === 10;
+  const isDiscount20 = value === 20;
+  const isDiscount = isDiscount10 || isDiscount20;
+
+  const discountedPrice = isDiscount10 ? 500 : isDiscount20 ? 1000 : basePrice;
 
   return (
     <div className="space-y-4 touch-none">
@@ -186,12 +186,11 @@ export default function TeamCountSlider({ value, onChange }: TeamCountSliderProp
       <div className="flex justify-between text-xs text-gray-500 mt-2">
         <span>1 Team (₹100)</span>
         <span>10 Teams → <s>₹1000</s> ₹500</span>
-        <span>20 Teams (₹2000)</span>
+        <span>20 Teams → <s>₹2000</s> ₹1000</span>
       </div>
     </div>
   );
 }
-
 
 
 
