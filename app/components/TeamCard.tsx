@@ -6806,10 +6806,10 @@ export default function TeamCard({
         </div>
         
         <div className="mb-3 bg-white p-2 rounded border border-gray-200">
-          <div className="flex justify-between text-sm mb-1 text-gray-800">
+{/*           <div className="flex justify-between text-sm mb-1 text-gray-800">
             <span>{team?.team1ShortName || captain.teamName}: {team1Count}</span>
             <span>{team?.team2ShortName || opponentTeamName}: {team2Count}</span>
-          </div>
+          </div> */}
           <div className="flex justify-between items-center mt-1">
             <div className="flex flex-wrap gap-1 text-xs">
               <span className="bg-gray-200 px-2 py-1 rounded text-gray-800">WK: {playersByRole['WK-Batsman'].length}</span>
