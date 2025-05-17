@@ -218,6 +218,8 @@ import { db } from "@/lib/firebase";
 import MatchList from "./components/MatchList";
 import { toast } from "sonner";
 import Script from "next/script";
+import { OfferBanner } from "@/components/OfferBanner";
+
 
 export default function Home() {
   const { user } = useUser();
