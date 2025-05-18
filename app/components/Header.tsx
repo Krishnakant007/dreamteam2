@@ -541,7 +541,7 @@ export default function Header() {
             <img 
               src="/logo.png" 
               alt="logo" 
-              className="w-8 h-8 md:w-10 md:h-10 object-contain" 
+              className="w-10 h-10 md:w-10 md:h-10 object-contain" 
             />
           </div>
           <span className="text-xl font-bold hidden sm:inline bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
