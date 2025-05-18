@@ -9642,7 +9642,7 @@
 
 
 
-//without teamcount 
+// DammGood working code
 
 "use client";
 import { useEffect, useState } from "react";
@@ -9684,22 +9684,17 @@ const PlayerRow = ({
   isSubstitute,
   wasSubstituted,
   isSubstituteList = false,
-  team1ShortName
 }: {
   player: PlayerDetail;
   isSubstitute: boolean;
   wasSubstituted?: boolean;
   isSubstituteList?: boolean;
-  team1ShortName?: string;
 }) => {
-  const isTeam1 = player.teamShortName === team1ShortName;
-  const bgColor = isTeam1 ? 'bg-black text-white' : 'bg-white text-black';
-  
   return (
     <div className={`flex items-center justify-between text-sm p-2 rounded border ${
       wasSubstituted ? 'bg-yellow-100 border-yellow-300' :
       isSubstitute ? 'bg-red-100 border-red-300' :
-      isSubstituteList ? 'bg-gray-100 border-gray-300' : `${bgColor} border-gray-300`
+      isSubstituteList ? 'bg-gray-100 border-gray-300' : 'bg-white border-gray-300'
     }`}>
       <div className="flex items-center gap-2 w-full">
         {isSubstituteList && <span className="text-yellow-500">→</span>}
@@ -9712,14 +9707,14 @@ const PlayerRow = ({
         />
         <div className="flex-1">
           <div className="flex justify-between items-center">
-            <span className={isSubstitute ? 'line-through' : ''}>
+            <span className={`${isSubstitute ? 'line-through' : ''} text-black`}>
               {player.name}
               {player.keeper && ' (WK)'}
               {wasSubstituted && player.replacedPlayer && ` (replaced ${player.replacedPlayer})`}
             </span>
           </div>
-          <p className={`text-xs ${isTeam1 ? 'text-gray-300' : 'text-gray-600'}`}>
-            {player.teamShortName || player.teamName}
+          <p className="text-xs text-gray-600">
+            {player.teamName}
           </p>
         </div>
       </div>
@@ -9745,35 +9740,54 @@ export default function TeamCard({
   const [showShareOptions, setShowShareOptions] = useState(false);
   const leagueType = getLeagueType(team?.riskLevel);
 
-  const captain = team?.captain || {
+  const captain = team?.captain || team?.players?.find(p => p.captain) || {
     id: 0,
     name: 'Unknown Captain',
     teamName: 'Unknown Team',
-    teamShortName: 'UNK',
     role: 'Batsman',
-    fullName: '',
-    nickName: '',
-    captain: false,
-    keeper: false,
-    isOverseas: false
+    captain: true,
+    keeper: false
   } as PlayerDetail;
 
-  const viceCaptain = team?.viceCaptain || {
+  const viceCaptain = team?.viceCaptain || team?.players?.find(p => p.viceCaptain) || {
     id: 0,
     name: 'Unknown Vice-Captain',
     teamName: 'Unknown Team',
-    teamShortName: 'UNK',
     role: 'Batsman',
-    fullName: '',
-    nickName: '',
-    captain: false,
-    keeper: false,
-    isOverseas: false
+    viceCaptain: true,
+    keeper: false
   } as PlayerDetail;
 
-  const opponentTeamName = team?.players?.find(
-    p => p.teamShortName !== captain.teamShortName
-  )?.teamName || 'Opponent';
+  const getTeamNames = () => {
+    if (!team?.players || team.players.length === 0) return ['Team 1', 'Team 2'];
+    
+    const uniqueTeams = Array.from(new Set(team.players.map(p => p.teamName)));
+    if (uniqueTeams.length < 2) {
+      return [uniqueTeams[0] || 'Team 1', 'Team 2'];
+    }
+    return uniqueTeams;
+  };
+
+  const [team1Name, team2Name] = getTeamNames();
+
+  const calculateTeamCounts = () => {
+    if (!team?.players) return { team1Count: 0, team2Count: 0 };
+    
+    let team1Count = 0;
+    let team2Count = 0;
+    
+    team.players.forEach(player => {
+      if (player.teamName === team1Name) {
+        team1Count++;
+      } else if (player.teamName === team2Name) {
+        team2Count++;
+      }
+    });
+    
+    return { team1Count, team2Count };
+  };
+
+  const { team1Count, team2Count } = calculateTeamCounts();
 
   useEffect(() => {
     const checkLineupChanges = () => {
@@ -9821,7 +9835,11 @@ export default function TeamCard({
         const updatedTeam = {
           ...team,
           players: updatedPlayers,
-          changes: changeCount
+          changes: changeCount,
+          team1Name,
+          team2Name,
+          team1Count,
+          team2Count
         };
         
         onUpdateTeam(updatedTeam);
@@ -9829,7 +9847,7 @@ export default function TeamCard({
     };
     
     checkLineupChanges();
-  }, [team, onUpdateTeam]);
+  }, [team, onUpdateTeam, team1Name, team2Name]);
 
   const playersByRole = {
     'WK-Batsman': team?.players?.filter(p => normalizeRole(p.role) === 'WK-Batsman') || [],
@@ -9840,19 +9858,16 @@ export default function TeamCard({
   };
 
   const generateShareText = () => {
-    const captainTeamName = team?.team1ShortName || captain.teamShortName;
-    const opponentName = team?.team2ShortName || opponentTeamName;
-  
-    let text = `Fantasy Team ${index + 1} - ${captainTeamName} vs ${opponentName}\n\n`;
-    text += `Captain: ${captain.name} (${captain.teamShortName || captain.teamName})\n`;
-    text += `Vice-Captain: ${viceCaptain.name} (${viceCaptain.teamShortName || viceCaptain.teamName})\n\n`;
+    let text = `Fantasy Team ${index + 1} - ${team1Name} vs ${team2Name}\n\n`;
+    text += `Captain: ${captain.name} (${captain.teamName})\n`;
+    text += `Vice-Captain: ${viceCaptain.name} (${viceCaptain.teamName})\n\n`;
   
     text += "Playing XI:\n";
     Object.entries(playersByRole).forEach(([role, players]) => {
       if (players.length > 0) {
         text += `${role}:\n`;
         players.forEach(player => {
-          text += `• ${player.name} (${player.teamShortName || player.teamName}) ${player.wasSubstituted ? '(replaced)' : ''}\n`;
+          text += `• ${player.name} (${player.teamName}) ${player.wasSubstituted ? '(replaced)' : ''}\n`;
         });
       }
     });
@@ -9860,14 +9875,15 @@ export default function TeamCard({
     if (team?.substitutes && team.substitutes.length > 0) {
       text += "\nSubstitutes:\n";
       team.substitutes.forEach(sub => {
-        text += `• ${sub.name} (${sub.teamShortName || sub.teamName})\n`;
+        text += `• ${sub.name} (${sub.teamName})\n`;
       });
     }
   
-    text += `\nLeague Type: ${leagueType.type}\n`;
+    text += `\nTeam Balance: ${team1Count} ${team1Name} | ${team2Count} ${team2Name}\n`;
+    text += `League Type: ${leagueType.type}\n`;
   
     if (isNewTeam) {
-      text += `\nNew team created for ${captainTeamName} vs ${opponentName} match`;
+      text += `\nNew team created for ${team1Name} vs ${team2Name} match`;
     }
   
     return text;
@@ -10026,7 +10042,7 @@ export default function TeamCard({
                     {captain.name}
                   </p>
                 </div>
-                <p className="text-xs text-gray-600">{captain.teamShortName || captain.teamName}</p>
+                <p className="text-xs text-gray-600">{captain.teamName}</p>
               </div>
             </div>
           </div>
@@ -10052,14 +10068,18 @@ export default function TeamCard({
                     {viceCaptain.name}
                   </p>
                 </div>
-                <p className="text-xs text-gray-600">{viceCaptain.teamShortName || viceCaptain.teamName}</p>
+                <p className="text-xs text-gray-600">{viceCaptain.teamName}</p>
               </div>
             </div>
           </div>
         </div>
         
         <div className="mb-3 bg-white p-2 rounded border border-gray-200">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between text-sm mb-1 text-gray-800">
+            <span>{team1Name}: {team1Count}</span>
+            <span>{team2Name}: {team2Count}</span>
+          </div>
+          <div className="flex justify-between items-center mt-1">
             <div className="flex flex-wrap gap-1 text-xs">
               <span className="bg-gray-200 px-2 py-1 rounded text-gray-800">WK: {playersByRole['WK-Batsman'].length}</span>
               <span className="bg-gray-200 px-2 py-1 rounded text-gray-800">Bats: {playersByRole['Batsman'].length}</span>
@@ -10086,7 +10106,6 @@ export default function TeamCard({
               player={player}
               isSubstitute={!!player.substitute}
               wasSubstituted={player.wasSubstituted}
-              team1ShortName={team?.team1ShortName}
             />
           ))}
           
@@ -10099,7 +10118,6 @@ export default function TeamCard({
               player={player}
               isSubstitute={!!player.substitute}
               wasSubstituted={player.wasSubstituted}
-              team1ShortName={team?.team1ShortName}
             />
           ))}
           
@@ -10112,7 +10130,6 @@ export default function TeamCard({
               player={player}
               isSubstitute={!!player.substitute}
               wasSubstituted={player.wasSubstituted}
-              team1ShortName={team?.team1ShortName}
             />
           ))}
           
@@ -10125,7 +10142,6 @@ export default function TeamCard({
               player={player}
               isSubstitute={!!player.substitute}
               wasSubstituted={player.wasSubstituted}
-              team1ShortName={team?.team1ShortName}
             />
           ))}
           
@@ -10138,7 +10154,6 @@ export default function TeamCard({
               player={player}
               isSubstitute={!!player.substitute}
               wasSubstituted={player.wasSubstituted}
-              team1ShortName={team?.team1ShortName}
             />
           ))}
           
@@ -10151,7 +10166,6 @@ export default function TeamCard({
                   player={sub}
                   isSubstitute={false}
                   isSubstituteList
-                  team1ShortName={team?.team1ShortName}
                 />
               ))}
             </>
@@ -10194,12 +10208,12 @@ export default function TeamCard({
         </div>
   
         <div className="space-y-3 px-2">
-          <div className="flex justify-center gap-4 my-2">
+          <div className="flex justify-between my-2">
             <div className="text-sm font-medium px-3 py-1 rounded-full bg-black text-white">
-              {team?.team1ShortName || captain.teamShortName}
+              {team1Name} ({team1Count})
             </div>
             <div className="text-sm font-medium px-3 py-1 rounded-full bg-white text-black border border-gray-300">
-              {team?.team2ShortName || opponentTeamName}
+              {team2Name} ({team2Count})
             </div>
           </div>
   
@@ -10211,7 +10225,7 @@ export default function TeamCard({
                 </div>
                 <div className={`flex ${group.players.length === 1 ? 'justify-center' : 'justify-between'} flex-wrap gap-y-2`}>
                   {group.players.map((player) => {
-                    const isTeam1 = player.teamShortName === team?.team1ShortName;
+                    const isTeam1 = player.teamName === team1Name;
                     const nameDisplay = formatPlayerName(player.name);
   
                     const bgStyle = isTeam1 ? 'bg-black text-white' : 'bg-white text-black border border-gray-300';
@@ -10254,7 +10268,7 @@ export default function TeamCard({
         </div>
   
         <div className="mt-3 text-center text-[11px] text-white sticky bottom-0 py-2 border-t border-green-200 bg-transparent">
-          {team?.team1ShortName || captain.teamShortName} vs {team?.team2ShortName || opponentTeamName}
+          {team1Name} ({team1Count}) vs {team2Name} ({team2Count})
         </div>
       </div>
     );
