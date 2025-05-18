@@ -329,7 +329,7 @@ export default function MatchPage() {
                           />
                           <span className={player.substitute ? 'text-gray-400' : ''}>
                             {player.name} ({player.role})
-                            {player.substitute && ' (Sub)'}
+                            {player.substitute && ''}
                           </span>
                         </div>
                       ))}
