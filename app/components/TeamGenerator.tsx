@@ -21013,7 +21013,7 @@ export const useTeamGenerator = ({
               'Batsman'
       };
       };
-      if (matchId === "1118874") {
+      if (matchId === "118874") {
   const players = [
     findPlayer("Josh Inglis"),
     findPlayer("Prabhsimran"),
