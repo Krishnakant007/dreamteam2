@@ -21143,7 +21143,7 @@ if (matchId === "118883") {
     findPlayer("Abhishek Sharma"),
     findPlayer("Harsh Dubey"),
     findPlayer("Jaydev Unadkat"),
-    findPlayer("Lasith Malinga")
+    findPlayer("Eshan Malinga")
   ];
 
   const captain = players.find(p => p.name.includes("Klaasen")) || players[0];
