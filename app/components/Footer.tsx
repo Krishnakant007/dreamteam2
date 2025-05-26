@@ -56,7 +56,7 @@ export default function Footer() {
         {/* Short Disclaimer */}
         <div className="mt-12 pt-8 border-t border-gray-700">
           <p className="text-sm text-white text-center">
-             Create Ai logic Algorithamic Team Builder . Fashtra accepts no liability for any losses.
+             Create Ai logic Algorithamic Team Builder . Fashtra Perfect team Provider for Grand League total 10 winner predicted  .
             By using our platform, you agree to our <Link href="/terms" className="underline">Terms</Link>.
           </p>
         </div>
