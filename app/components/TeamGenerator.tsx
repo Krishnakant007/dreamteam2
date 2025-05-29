@@ -21214,7 +21214,7 @@ if (matchId === "118898") {
     findPlayer("Rishabh Pant"),
     findPlayer("Virat Kohli"),
     findPlayer("Mitchell Marsh"),
-    findPlayer("Mayank Agarwal"),
+    findPlayer("Mayank Agarawal"),
     findPlayer("Krunal Pandya"),
     findPlayer("Bhuvneshwar Kumar"),
     findPlayer("Avesh Khan"),
