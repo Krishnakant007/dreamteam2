@@ -21281,7 +21281,81 @@ if (matchId === "118883") {
     }
   };
 }
+if (matchId === "118916") {
+  const players = [
+    findPlayer("Jonny Bairstow"),
+    findPlayer("Kusal Mendis"),
+    findPlayer("Rohit Sharma-C"),
+    findPlayer("Suryakumar Yadav"),
+    findPlayer("Tilak Varma"),
+    findPlayer("Sai Sudharsan-VC"),
+    findPlayer("Washington Sundar"),
+    findPlayer("Trent Boult"),
+    findPlayer("Jasprit Bumrah"),
+    findPlayer("Prasidh Krishna"),
+    findPlayer("Sai Kishore")
+  ];
 
+  // Fallback for any players not found
+  const finalPlayers = players.map(p => {
+    if (p.id === 0) { // If player not found
+      return {
+        ...defaultPlayer,
+        id: -1 * Date.now(),
+        name: p.name.split('-')[0],
+        role: p.name.includes('-C') ? 'Batsman' : 
+              p.name.includes('-Vc') ? 'Batsman' : 
+              normalizeRole(p.role),
+        teamName: p.name.includes('Boult') ? team2?.name : team1?.name,
+        teamShortName: p.name.includes('Boult') ? team2?.shortName : team1?.shortName
+      };
+    }
+    return p;
+  });
+
+  const captain = finalPlayers.find(p => p.name.includes("Rohit Sharma")) || finalPlayers[0];
+  const viceCaptain = finalPlayers.find(p => p.name.includes("Sai Sudharsan")) || finalPlayers[1];
+
+  return {
+    id: Date.now(),
+    players: finalPlayers.sort((a, b) => getRoleOrder(a.role) - getRoleOrder(b.role)),
+    captain,
+    viceCaptain,
+    substitutes: [],
+    teamName: "Expert's Choice (118916)",
+    team1ShortName: team1?.shortName || 'T1',
+    team2ShortName: team2?.shortName || 'T2',
+    riskLevel,
+    matchId,
+    matchName: `${team1?.name || 'Team 1'} vs ${team2?.name || 'Team 2'}`,
+    createdAt: new Date().toISOString(),
+    changes: 0,
+    hadChanges: false,
+    userId: user?.id || '',
+    userEmail: user?.primaryEmailAddress?.emailAddress || '',
+    team1Logo: team1?.logo || '/fallback-team.png',
+    team2Logo: team2?.logo || '/fallback-team.png',
+    team1Count: finalPlayers.filter(p => p.teamShortName === team1?.shortName).length,
+    team2Count: finalPlayers.filter(p => p.teamShortName === team2?.shortName).length,
+    wkCount: finalPlayers.filter(p => normalizeRole(p.role) === 'WK-Batsman').length,
+    batCount: finalPlayers.filter(p => 
+      ['Batsman', 'Batting Allrounder'].includes(normalizeRole(p.role))
+    ).length,
+    arCount: finalPlayers.filter(p => normalizeRole(p.role) === 'Bowling Allrounder').length,
+    bowlCount: finalPlayers.filter(p => normalizeRole(p.role) === 'Bowler').length,
+    teamComposition: {
+      'WK-Batsman': finalPlayers.filter(p => normalizeRole(p.role) === 'WK-Batsman').length,
+      'Batsman': finalPlayers.filter(p => normalizeRole(p.role) === 'Batsman').length,
+      'Batting Allrounder': finalPlayers.filter(p => normalizeRole(p.role) === 'Batting Allrounder').length,
+      'Bowling Allrounder': finalPlayers.filter(p => normalizeRole(p.role) === 'Bowling Allrounder').length,
+      'Bowler': finalPlayers.filter(p => normalizeRole(p.role) === 'Bowler').length,
+      [team1?.shortName || 'T1']: finalPlayers.filter(p => p.teamShortName === team1?.shortName).length,
+      [team2?.shortName || 'T2']: finalPlayers.filter(p => p.teamShortName === team2?.shortName).length,
+      overseas: finalPlayers.filter(p => p.isOverseas).length,
+      totalScore: finalPlayers.reduce((sum, p) => sum + (p.selectedBy || 0), 0)
+    }
+  };
+}
 if (matchId === "118898") {
   const players = [
     findPlayer("Phil Salt"),
